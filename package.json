@@ -5,12 +5,13 @@
   "main": "src/index.tsx",
   "privagte": true,
   "scripts": {
-    "clean:backend": "rimraf backend/dist",
-    "clean:ui": "rimraf ui/build",
-    "clean": "npm run clean:backend && npm run clean:ui",
 
-    "build:backend": "npm run clean:backend && npm run build --workspace=backend",
-    "build:ui": "npm run clean:ui && npm run build --workspace=ui",
+    "clean": "rimraf build",
+
+    "build:backend": "npm run clean && npm run build --workspace=backend",
+    "build:ui": "npm run build --workspace=ui",
+
+
     "build": "npm run build:backend && npm run build:ui",
 
     "start:backend": "npm run start --workspace=backend",

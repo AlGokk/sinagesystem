@@ -15,10 +15,10 @@ app.use(express.json());
 
 app.use('/api', routes);
 
-app.use(express.static(path.join(__dirname, '../../ui/build')));
+app.use(express.static(path.join(__dirname, '../../build/ui')));
 
 app.get('/*splat', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '../../ui/build', 'index.html'));
+  res.sendFile(path.resolve(__dirname, '../../build/ui', 'index.html'));
 });
 
 console.log('----------------------')
