@@ -3,11 +3,21 @@
   "version": "1.0.0",
   "description": "Frontend für mein Fullstack Projekt mit React und TypeScript",
   "main": "src/index.tsx",
+  "privagte": true,
   "scripts": {
-    "server": "nodemon --watch src --ext ts --exec ts-node backend/src/server.ts",
-    "start:backend": "cd backend && npm run start",
-    "start:frontend": "cd frontend && npm start",
-    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+    "clean:backend": "rimraf backend/dist",
+    "clean:frontend": "rimraf frontend/build",
+    "clean": "npm run clean:backend && npm run clean:frontend",
+
+    "build:backend": "npm run clean:backend && npm run build --workspace=backend",
+    "build:frontend": "npm run clean:frontend && npm run build --workspace=frontend",
+    "build": "npm run build:backend && npm run build:frontend",
+
+    "start:backend": "npm run start --workspace=backend",
+    "start:frontend": "npm run start --workspace=frontend",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run start --workspace=frontend\""
   },
   "keywords": [
     "react",
@@ -16,6 +26,10 @@
   ],
   "author": "Dein Name",
   "license": "ISC",
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "dependencies": {
     "cors": "^2.8.5",
     "mongoose": "^8.18.1",
@@ -30,6 +44,8 @@
     "@types/node": "^24.3.1",
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.10",
+    "rimraf": "^6.0.1",
+    "serve": "^14.2.5",
     "ts-node": "^10.9.2"
   }
 }
