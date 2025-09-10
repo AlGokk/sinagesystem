@@ -1,33 +1,33 @@
 {
-  "name": "frontend",
+  "name": "ui",
   "version": "1.0.0",
-  "description": "Frontend für mein Fullstack Projekt mit React und TypeScript",
+  "description": "ui für mein Fullstack Projekt mit React und TypeScript",
   "main": "src/index.tsx",
   "privagte": true,
   "scripts": {
     "clean:backend": "rimraf backend/dist",
-    "clean:frontend": "rimraf frontend/build",
-    "clean": "npm run clean:backend && npm run clean:frontend",
+    "clean:ui": "rimraf ui/build",
+    "clean": "npm run clean:backend && npm run clean:ui",
 
     "build:backend": "npm run clean:backend && npm run build --workspace=backend",
-    "build:frontend": "npm run clean:frontend && npm run build --workspace=frontend",
-    "build": "npm run build:backend && npm run build:frontend",
+    "build:ui": "npm run clean:ui && npm run build --workspace=ui",
+    "build": "npm run build:backend && npm run build:ui",
 
     "start:backend": "npm run start --workspace=backend",
-    "start:frontend": "npm run start --workspace=frontend",
-    "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "start:ui": "npm run start --workspace=ui",
+    "start": "concurrently \"npm run start:backend\" \"npm run start:ui\"",
 
-    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run start --workspace=frontend\""
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run start --workspace=ui\""
   },
   "keywords": [
     "react",
     "typescript",
-    "frontend"
+    "ui"
   ],
   "author": "Dein Name",
   "license": "ISC",
   "workspaces": [
-    "frontend",
+    "ui",
     "backend"
   ],
   "dependencies": {
