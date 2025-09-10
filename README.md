@@ -13,7 +13,7 @@ git clone https://github.com/AlGokk/sinagesystem.git
 
 Wechsle in das Projektverzeichnis und installiere alle notwendigen Pakete:
 
-npm install (wichtig, auf deinem Computer musst du Node.js, NPM installiert sein, hier ist eine Anleitung https://medium.com/@littlecodingthings/how-to-install-npm-on-macos-039b77e37244)
+npm install (wichtig, auf deinem Computer musst Node.js, NPM installiert sein, hier ist eine Anleitung https://medium.com/@littlecodingthings/how-to-install-npm-on-macos-039b77e37244)
 
 
 ### 3. .env-Dateien erstellen
@@ -27,14 +27,14 @@ MONGODB_URI=mongodb+srv://<db>:<pw>@cluster0.xedlb3e.mongodb.net/?retryWrites=tr
 
 ### 4. Entwicklungsmodus starten
 
-Starte den Entwicklungsserver mit:
+Starte den Entwicklungsserver im Terminal mit:
 
 npm run dev
 
 
-Dadurch wird der Backend-Server gestartet, der sich mit der MongoDB-Datenbank verbindet, und die Webseite wird geöffnet, auf der die Preisliste angezeigt wird.
+Der Backend-Server wird gestartet, der sich mit der MongoDB-Datenbank verbindet. Im Anschluss startet das Programm die Webseite(UI), wo die Preisliste zu sehen ist. 
 
-Du kannst in deinem Browser die Seite unter folgender Seite http://localhost:3000 aufrufen.
+Wenn es keine Fehler im Terminal gibt, dann öffnest du im Browser folgende Seite http://localhost:3000.
 
 ---
 
