@@ -1,11 +1,18 @@
 import React from 'react';
 import './App.css';
-import PriceList from "./pricelists/test";
+import PagesManager from './components/PagesManager/PageManager';
+import PriceListTemplate from './components/PriceListTemplates/PriceListTemplate';
+
+const myPageId = '68c308d3c5b64fe319d8277f';
 
 function App() {
   return (
     <div className="App">
-     <PriceList/>
+      {/* Übergibt die pageId als Prop an PriceListTemplate */}
+      <PriceListTemplate pageId={myPageId} />
+      {/* Weitere Komponenten auskommentiert, solange nicht benötigt */}
+      {/* <PriceList/> */}
+      {/* <PagesManager /> */}
     </div>
   );
 }
