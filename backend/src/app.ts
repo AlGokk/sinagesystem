@@ -25,6 +25,7 @@ app.use('/api/pages', pagesRouter);
 // Falls andere APIs bestehen bleiben können sie auch noch unter '/api/...'
 // Beispiel: app.use('/api/helloWorld', helloWorldRouter);
 
+
 // Statische UI-Dateien ausliefern (React Build)
 app.use(express.static(path.join(__dirname, '../../build/ui')));
 
