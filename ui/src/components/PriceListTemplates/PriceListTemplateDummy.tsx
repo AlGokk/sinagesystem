@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 
 // FontAwesome Importe
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFloppyDisk, faEye } from '@fortawesome/free-solid-svg-icons';
+import { faFloppyDisk, faEye, faPen } from '@fortawesome/free-solid-svg-icons';
 
 interface ContentItem {
   name: string;
@@ -57,18 +56,50 @@ const columnStyle = {
   flexBasis: "48%",
 };
 
-const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
-  const [page, setPage] = useState<Page | null>(null);
+const dummyPage: Page = {
+  _id: "dummy-id",
+  title: "Preisliste Test",
+  category: "Testkategorie",
+  content: {
+    Pizzen: [
+      { name: "Margherita", preis: 12.5 },
+      { name: "Salami", preis: 14.0 },
+      { name: "Prosciutto", preis: 15.0 },
+      { name: "Funghi", preis: 13.5 },
+      { name: "Quattro Stagioni", preis: 16.0 },
+      { name: "Diavola", preis: 15.5 },
+      { name: "Vegetarisch", preis: 14.0 },
+      { name: "Tonno", preis: 16.5 },
+      { name: "Hawaii", preis: 15.0 },
+      { name: "Calzone", preis: 17.0 },
+    ],
+    Nudle: [
+      { name: "Spaghetti Bolognese", preis: 14.0 },
+      { name: "Penne Arrabiata", preis: 13.5 },
+      { name: "Tagliatelle al Pesto", preis: 15.0 },
+      { name: "Lasagne", preis: 16.0 },
+      { name: "Tortellini panna", preis: 15.5 },
+    ],
+    Kaltgetränk: [
+      { name: "Cola", preis: 4.5 },
+      { name: "Orangina", preis: 4.5 },
+      { name: "Mineralwasser", preis: 3.5 },
+      { name: "Apfelsaft", preis: 4.0 },
+      { name: "Eistee", preis: 4.5 },
+    ],
+    Café: [
+      { name: "Espresso", preis: 3.5 },
+      { name: "Cappuccino", preis: 4.5 },
+      { name: "Latte Macchiato", preis: 4.5 },
+      { name: "Schale Kaffee", preis: 4.0 },
+    ],
+  },
+};
+
+const PriceListTemplateDummy: React.FC<Props> = ({ pageId }) => {
+  const [page, setPage] = useState<Page | null>(dummyPage);
   const [editing, setEditing] = useState<{ [category: string]: { [index: number]: boolean } }>({});
   const [previewMode, setPreviewMode] = useState(false);
-
-  useEffect(() => {
-    axios.get(`/api/pages/${pageId}`)
-      .then(res => setPage(res.data))
-      .catch(() => alert('Fehler beim Laden der Preisliste'));
-  }, [pageId]);
-
-  if (!page) return <div>Lade Preisliste...</div>;
 
   const toggleEdit = (category: string, index: number) => {
     if (previewMode) return;
@@ -98,23 +129,15 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
     setPage({ ...page, content: newContent });
   };
 
-  const saveChanges = async () => {
+  const saveChanges = () => {
     if (!page || previewMode) return;
-    try {
-      await axios.put(`/api/pages/${page._id}`, {
-        title: page.title,
-        category: page.category,
-        content: page.content,
-      });
-      alert('Preisliste gespeichert');
-    } catch {
-      alert('Fehler beim Speichern');
-    }
+    alert('Preisliste gespeichert (Dummy-Daten, keine Backend-Anbindung)');
   };
+
+  if (!page) return <div>Lade Preisliste...</div>;
 
   return (
     <div style={containerStyle}>
-      {/* Icons über Buttons mit FontAwesome */}
       <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
         <button
           onClick={() => setPreviewMode(!previewMode)}
@@ -164,7 +187,9 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
                     <>
                       <span>{item.name}</span>
                       <span>{item.preis.toFixed(2)} CHF</span>
-                      <button onClick={() => toggleEdit(category, idx)}>Bearbeiten</button>
+                      <button onClick={() => toggleEdit(category, idx)} title="Bearbeiten">
+                        <FontAwesomeIcon icon={faPen} />
+                      </button>
                     </>
                   )}
                 </div>
@@ -206,7 +231,9 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
                     <>
                       <span>{item.name}</span>
                       <span>{item.preis.toFixed(2)} CHF</span>
-                      <button onClick={() => toggleEdit(category, idx)}>Bearbeiten</button>
+                      <button onClick={() => toggleEdit(category, idx)} title="Bearbeiten">
+                        <FontAwesomeIcon icon={faPen} />
+                      </button>
                     </>
                   )}
                 </div>
@@ -219,4 +246,4 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
   );
 };
 
-export default PriceListTemplate;
+export default PriceListTemplateDummy;
