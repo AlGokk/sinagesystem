@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
-import Icon from '../IconLibrary/IconLibrary'; // Deine zentrale Icon-Komponente
-import PageManagementModal from '../PageManagementModals/PageManagementModal';
+import Icon from '../../IconLibrary/IconLibrary';
+import PageManagementModal from '../../PageManagementModals/PageManagementModal';
 
 interface ContentItem {
   name: string;
@@ -24,6 +24,46 @@ interface Props {
   pageId?: string;
   previewMode?: boolean;
 }
+
+const dummyPage: Page = {
+  _id: "68c308d3c5b64fe319d8277f",
+  title: "Demo Preisliste",
+  category: "Demo Kategorie",
+  content: {
+    Pizzen: [
+      { name: "Margherita", preis: 12.5 },
+      { name: "Salami", preis: 14.0 },
+      { name: "Prosciutto", preis: 15.0 },
+      { name: "Funghi", preis: 13.5 },
+      { name: "Quattro Stagioni", preis: 16.0 },
+      { name: "Diavola", preis: 15.5 },
+      { name: "Vegetarisch", preis: 14.0 },
+      { name: "Tonno", preis: 16.5 },
+      { name: "Hawaii", preis: 15.0 },
+      { name: "Calzone", preis: 17.0 },
+    ],
+    Nudle: [
+      { name: "Spaghetti Bolognese", preis: 14.0 },
+      { name: "Penne Arrabiata", preis: 13.5 },
+      { name: "Tagliatelle al Pesto", preis: 15.0 },
+      { name: "Lasagne", preis: 16.0 },
+      { name: "Tortellini panna", preis: 15.5 },
+    ],
+    Kaltgetränk: [
+      { name: "Cola", preis: 4.5 },
+      { name: "Orangina", preis: 4.5 },
+      { name: "Mineralwasser", preis: 3.5 },
+      { name: "Apfelsaft", preis: 4.0 },
+      { name: "Eistee", preis: 4.5 },
+    ],
+    Café: [
+      { name: "Espresso", preis: 3.5 },
+      { name: "Cappuccino", preis: 4.5 },
+      { name: "Latte Macchiato", preis: 4.5 },
+      { name: "Schale Kaffee", preis: 4.0 },
+    ],
+  },
+};
 
 const containerStyle: React.CSSProperties = {
   maxWidth: 900,
@@ -52,8 +92,8 @@ const logoStyle: React.CSSProperties = {
 
 const sectionStyle: React.CSSProperties = {
   borderBottom: '2px solid #ccc',
-  paddingBottom: '6px',
-  marginBottom: '16px',
+  paddingBottom: 6,
+  marginBottom: 16,
 };
 
 const itemStyle = (isLast: boolean): React.CSSProperties => ({
@@ -67,7 +107,7 @@ const columnStyle: React.CSSProperties = {
   flexBasis: '48%',
 };
 
-const PriceListTemplateAlternative: React.FC<Props> = (props) => {
+const PriceListTemplateAlternativeDummy: React.FC<Props> = (props) => {
   const { pageId: propPageId, previewMode = false } = props;
   const { pageId: paramPageId } = useParams<{ pageId: string }>();
   const pageId = propPageId || paramPageId || '';
@@ -80,19 +120,22 @@ const PriceListTemplateAlternative: React.FC<Props> = (props) => {
     if (!pageId) return;
     axios.get(`/api/pages/${pageId}`)
       .then(res => setPage(res.data))
-      .catch(() => alert('Fehler beim Laden der Preisliste'));
+      .catch(() => {
+        alert('Fehler beim Laden der Preisliste, Dummy-Daten werden verwendet');
+        setPage(dummyPage);
+      });
   }, [pageId]);
 
   if (!page) return <div>Lade Preisliste...</div>;
 
   const toggleEdit = (category: string, index: number) => {
-    if (previewMode) return; // Keine Editierfunktion im Preview
+    if (previewMode) return;
     setEditing(prev => ({
       ...prev,
       [category]: {
         ...prev[category],
         [index]: !prev[category]?.[index],
-      }
+      },
     }));
   };
 
@@ -115,6 +158,10 @@ const PriceListTemplateAlternative: React.FC<Props> = (props) => {
 
   const saveChanges = async () => {
     if (!page || previewMode) return;
+    if (page._id === dummyPage._id) {
+      alert('Dummy-Daten: Speichern simuliert');
+      return;
+    }
     try {
       await axios.put(`/api/pages/${page._id}`, {
         title: page.title,
@@ -134,6 +181,7 @@ const PriceListTemplateAlternative: React.FC<Props> = (props) => {
 
   return (
     <div style={containerStyle}>
+      dummy
       <div style={headerStyle}>
         <img
           src="https://static.vecteezy.com/system/resources/thumbnails/011/157/909/small_2x/pizzeria-emblem-on-blackboard-pizza-logo-template-emblem-for-cafe-restaurant-or-food-delivery-service-vector.jpg"
@@ -152,13 +200,11 @@ const PriceListTemplateAlternative: React.FC<Props> = (props) => {
           >
             <Icon name="cog" size="lg" />
           </button>
-
           <Link to={`/preview/${pageId}`} title="Vorschau" style={{ color: 'inherit', display: 'inline-block' }}>
             <div style={{ cursor: 'pointer' }}>
               <Icon name="eye" size="lg" />
             </div>
           </Link>
-
           <button
             onClick={saveChanges}
             title="Speichern"
@@ -281,4 +327,4 @@ const PriceListTemplateAlternative: React.FC<Props> = (props) => {
   );
 };
 
-export default PriceListTemplateAlternative;
+export default PriceListTemplateAlternativeDummy;

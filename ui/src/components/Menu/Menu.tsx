@@ -47,7 +47,7 @@ const Menu: React.FC<MenuProps> = ({
           }}
         >
           <FontAwesomeIcon icon={faHome} />
-          Alle Seiten
+          Seiten
         </Link>
       </div>
 

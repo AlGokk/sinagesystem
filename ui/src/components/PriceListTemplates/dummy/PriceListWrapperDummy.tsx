@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
-import PriceListTemplateWithDatabase from "./prod/templates/PriceListTemplateWithDatabase";
-import PriceListTemplateAlternative from "./prod/templates/PriceListTemplateAlternative";
-import Menu from "../Menu/Menu";
+import PriceListTemplateDummy from "./PriceListTemplateDummy";
+import PriceListTemplateAlternativeDummy from "./PriceListTemplateAlternativeDummy";
+import Menu from "../../Menu/Menu";
 
 const PriceListWrapper: React.FC = () => {
   const { pageId } = useParams<{ pageId: string }>();
@@ -12,10 +12,10 @@ const PriceListWrapper: React.FC = () => {
 
   const renderTemplate = () => {
     if (selectedTemplate === "database") {
-      return <PriceListTemplateWithDatabase pageId={pageId} previewMode={false} />;
+      return <PriceListTemplateDummy pageId={pageId} previewMode={false} />;
     }
     if (selectedTemplate === "alternative") {
-      return <PriceListTemplateAlternative pageId={pageId} previewMode={false} />;
+      return <PriceListTemplateAlternativeDummy pageId={pageId} previewMode={false} />;
     }
     return null;
   };

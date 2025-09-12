@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useParams } from 'react-router-dom';
-import Icon from '../IconLibrary/IconLibrary'; // Deine zentrale Icon-Komponente
-import PageManagementModal from '../PageManagementModals/PageManagementModal';
+import Icon from '../../../IconLibrary/IconLibrary'; // Deine zentrale Icon-Komponente
+import PageManagementModal from '../../../PageManagementModals/PageManagementModal';
 
 interface ContentItem {
   name: string;

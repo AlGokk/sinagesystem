@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import PriceListTemplateWithDatabase from './PriceListTemplateWithDatabase';
-import PriceListTemplateAlternative from './PriceListTemplateAlternative';
-import Menu from '../Menu/Menu';
+import PriceListTemplateWithDatabase from './templates/PriceListTemplateWithDatabase';
+import PriceListTemplateAlternative from './templates/PriceListTemplateAlternative';
+import Menu from '../../Menu/Menu';
 
 const PriceListPreviewWrapper: React.FC = () => {
   const { pageId } = useParams<{ pageId: string }>();
