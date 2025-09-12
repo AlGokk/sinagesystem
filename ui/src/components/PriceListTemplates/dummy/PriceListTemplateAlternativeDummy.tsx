@@ -1,280 +1,175 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFloppyDisk, faEye, faPen } from '@fortawesome/free-solid-svg-icons';
-import Icon from '../../IconLibrary/IconLibrary';
-import PageManagementModal from '../../PageManagementModals/PageManagementModal';
+import { faFloppyDisk, faEye, faPen, faCog } from '@fortawesome/free-solid-svg-icons';
+import PageManagementModal from '../../PageManagementModals/PageManagementModal'; // Pfad anpassen
 
-interface ContentItem {
-  name: string;
-  preis: number;
-}
-
-interface CategoryContent {
-  [category: string]: ContentItem[];
-}
-
-interface Page {
-  _id: string;
-  title: string;
-  category: string;
-  content: CategoryContent;
-}
-
-interface Props {
-  pageId?: string;
-  previewMode?: boolean;
-}
-
-const dummyPage: Page = {
-  _id: "68c308d3c5b64fe319d8277f",
-  title: "Demo Preisliste",
-  category: "Demo Kategorie",
-  content: {
-    Pizzen: [
-      { name: "Margherita", preis: 12.5 },
-      { name: "Salami", preis: 14.0 },
-      { name: "Prosciutto", preis: 15.0 },
-      { name: "Funghi", preis: 13.5 },
-      { name: "Quattro Stagioni", preis: 16.0 },
-      { name: "Diavola", preis: 15.5 },
-      { name: "Vegetarisch", preis: 14.0 },
-      { name: "Tonno", preis: 16.5 },
-      { name: "Hawaii", preis: 15.0 },
-      { name: "Calzone", preis: 17.0 },
-    ],
-    Nudle: [
-      { name: "Spaghetti Bolognese", preis: 14.0 },
-      { name: "Penne Arrabiata", preis: 13.5 },
-      { name: "Tagliatelle al Pesto", preis: 15.0 },
-      { name: "Lasagne", preis: 16.0 },
-      { name: "Tortellini panna", preis: 15.5 },
-    ],
-    Kaltgetränk: [
-      { name: "Cola", preis: 4.5 },
-      { name: "Orangina", preis: 4.5 },
-      { name: "Mineralwasser", preis: 3.5 },
-      { name: "Apfelsaft", preis: 4.0 },
-      { name: "Eistee", preis: 4.5 },
-    ],
-    Café: [
-      { name: "Espresso", preis: 3.5 },
-      { name: "Cappuccino", preis: 4.5 },
-      { name: "Latte Macchiato", preis: 4.5 },
-      { name: "Schale Kaffee", preis: 4.0 },
-    ],
-  },
-};
-
-const sectionStyle: React.CSSProperties = {
-  borderBottom: '2px solid #ccc',
-  paddingBottom: 6,
-  marginBottom: 16,
-};
-
-const itemStyle = (isLast: boolean): React.CSSProperties => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '10px 0',
-  borderBottom: isLast ? 'none' : '1px solid #eee',
-});
-
-const containerStyle: React.CSSProperties = {
-  display: 'flex',
-  justifyContent: 'space-between',
+const outerContainerStyle: React.CSSProperties = {
   maxWidth: 900,
   margin: '40px auto',
-  backgroundColor: '#fff',
-  color: '#111',
+  padding: 0,
   fontFamily: "'Montserrat', sans-serif",
-  padding: 20,
-  borderRadius: 12,
-  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+};
+
+const controlsBarStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'flex-end',
+  gap: 16,
+  padding: '8px 20px',
+  backgroundColor: '#fff',
+  borderRadius: '12px 12px 0 0',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+};
+
+const buttonStyle: React.CSSProperties = {
+  cursor: 'pointer',
+  background: 'none',
+  border: 'none',
+  color: '#111',
+  fontSize: '1.5rem',
+  padding: 0,
+};
+
+const containerStyle: React.CSSProperties = {
+  height: 'calc(100vh)', // Höhe ohne Steuerleiste
+  width: '100%',
+  backgroundImage: `url('https://thumbs.dreamstime.com/b/pizza-slices-flying-black-background-delicious-peperoni-pieces-melting-cheese-ingredients-generated-ai-330564419.jpg')`,
+  backgroundSize: '100% auto',
+  backgroundPosition: 'center',
+  backgroundRepeat: 'no-repeat',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
   position: 'relative',
+  color: '#fff',
+  borderRadius: '0 0 16px 16px',
+  boxShadow: '0 6px 15px rgba(0,0,0,0.3)',
+  overflow: 'hidden',
+  padding: '0 20px',
 };
 
-const columnStyle: React.CSSProperties = {
-  flexBasis: '48%',
+const overlayStyle: React.CSSProperties = {
+  position: 'absolute',
+  top: 0, left: 0, right: 0, bottom: 0,
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  borderRadius: '0 0 16px 16px',
+  zIndex: 0,
 };
 
-const PriceListTemplateAlternativeDummy: React.FC<Props> = (props) => {
-  const [page, setPage] = useState<Page | null>(dummyPage);
-  const [editing, setEditing] = useState<{ [category: string]: { [index: number]: boolean } }>({});
+const titleStyle: React.CSSProperties = {
+  position: 'relative',
+  zIndex: 1,
+  fontSize: '6rem',
+  fontWeight: 'bold',
+  marginBottom: 12,
+  textAlign: 'center' as const,
+  textShadow: '2px 2px 8px rgba(0,0,0,0.7)',
+  userSelect: 'none',
+};
+
+const priceStyle: React.CSSProperties = {
+  position: 'relative',
+  zIndex: 1,
+  fontSize: '3rem',
+  fontWeight: '600',
+  textAlign: 'center' as const,
+  textShadow: '1px 1px 6px rgba(0,0,0,0.7)',
+  userSelect: 'none',
+};
+
+const PriceListTemplateAlternativeDummy: React.FC = () => {
+  const [title, setTitle] = useState('Pizzen');
+  const [price, setPrice] = useState('ab 19.99 CHF');
   const [previewMode, setPreviewMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const toggleEdit = (category: string, index: number) => {
-    if (previewMode) return;
-    setEditing(prev => ({
-      ...prev,
-      [category]: {
-        ...prev[category],
-        [index]: !prev[category]?.[index],
-      }
-    }));
-  };
-
-  const handleChange = (
-    category: string,
-    index: number,
-    field: keyof ContentItem,
-    value: string | number,
-  ) => {
-    if (!page || previewMode) return;
-    const newContent = { ...page.content };
-    const items = [...(newContent[category] || [])];
-    items[index] = {
-      ...items[index],
-      [field]: field === 'preis' ? Number(value) : value,
-    };
-    newContent[category] = items;
-    setPage({ ...page, content: newContent });
-  };
-
   const saveChanges = () => {
-    if (!page || previewMode) return;
-    alert('Preisliste gespeichert (Dummy-Daten, keine Backend-Anbindung)');
+    alert(`Gespeichert: ${title} - ${price} (Dummy-Funktion)`);
   };
 
-  const handleSavePage = (title: string, category: string) => {
-    alert(`Seite speichern: ${title} (Kategorie: ${category})`);
+  const handleSavePage = (newTitle: string, newCategory: string) => {
+    setTitle(newTitle);
+    // Hier kannst du ggf. weitere Aktionen mit newCategory machen
     setModalOpen(false);
+    alert(`Seite gespeichert: ${newTitle} (Kategorie: ${newCategory})`);
   };
 
-  if (!page) return <div>Lade Preisliste...</div>;
+  // Dummy Page-Objekt analog deinem Original für Übergabe an Modal:
+  const page = {
+    _id: 'dummy-id',
+    title,
+    category: 'Demo Kategorie',
+  };
 
   return (
-    <div style={containerStyle}>
-      {/* Steuerungsbuttons rechts oben */}
-      <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
+    <div style={outerContainerStyle}>
+      {/* Steuerungsleiste oben */}
+      <div style={controlsBarStyle}>
         <button
           onClick={() => setPreviewMode(!previewMode)}
           title={previewMode ? "Bearbeitungsmodus" : "Vorschau umschalten"}
-          style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+          style={buttonStyle}
         >
-          <FontAwesomeIcon icon={faEye} size="lg" />
+          <FontAwesomeIcon icon={faEye} />
         </button>
         {!previewMode && (
           <>
             <button
-              onClick={() => setModalOpen(true)}
-              title="Seitenverwaltung öffnen"
-              style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-            >
-              <Icon name="cog" size="lg" />
-            </button>
-            <button
               onClick={saveChanges}
               title="Speichern"
-              style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+              style={buttonStyle}
             >
-              <FontAwesomeIcon icon={faFloppyDisk} size="lg" />
+              <FontAwesomeIcon icon={faFloppyDisk} />
+            </button>
+            <button
+              onClick={() => setModalOpen(true)}
+              title="Einstellungen"
+              style={buttonStyle}
+            >
+              <FontAwesomeIcon icon={faCog} />
             </button>
           </>
         )}
       </div>
 
-      <div style={columnStyle}>
-        {['Pizzen', 'Nudle'].map(category => (
-          <section key={category}>
-            <h2 style={sectionStyle}>{category}</h2>
-            {(page.content?.[category] || []).map((item, idx) => {
-              const isEditing = editing[category]?.[idx] || false;
-              return (
-                <div key={idx} style={itemStyle(idx === (page.content?.[category]?.length || 0) - 1)}>
-                  {previewMode ? (
-                    <>
-                      <span>{item.name}</span>
-                      <span>{item.preis.toFixed(2)} CHF</span>
-                    </>
-                  ) : isEditing ? (
-                    <>
-                      <input
-                        value={item.name}
-                        onChange={e => handleChange(category, idx, 'name', e.target.value)}
-                        style={{ flex: 2, marginRight: 10 }}
-                      />
-                      <input
-                        type="number"
-                        value={item.preis}
-                        onChange={e => handleChange(category, idx, 'preis', Number(e.target.value))}
-                        style={{ width: 80, marginRight: 10 }}
-                      />
-                      <button onClick={() => toggleEdit(category, idx)}>Fertig</button>
-                    </>
-                  ) : (
-                    <>
-                      <span>{item.name}</span>
-                      <span>{item.preis.toFixed(2)} CHF</span>
-                      <button
-                        onClick={() => toggleEdit(category, idx)}
-                        title="Bearbeiten"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                      >
-                        <FontAwesomeIcon icon={faPen} />
-                      </button>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </section>
-        ))}
-      </div>
-      <div style={columnStyle}>
-        {['Kaltgetränk', 'Café'].map(category => (
-          <section key={category}>
-            <h2 style={sectionStyle}>{category}</h2>
-            {(page.content?.[category] || []).map((item, idx) => {
-              const isEditing = editing[category]?.[idx] || false;
-              return (
-                <div key={idx} style={itemStyle(idx === (page.content?.[category]?.length || 0) - 1)}>
-                  {previewMode ? (
-                    <>
-                      <span>{item.name}</span>
-                      <span>{item.preis.toFixed(2)} CHF</span>
-                    </>
-                  ) : isEditing ? (
-                    <>
-                      <input
-                        value={item.name}
-                        onChange={e => handleChange(category, idx, 'name', e.target.value)}
-                        style={{ flex: 2, marginRight: 10 }}
-                      />
-                      <input
-                        type="number"
-                        value={item.preis}
-                        onChange={e => handleChange(category, idx, 'preis', Number(e.target.value))}
-                        style={{ width: 80, marginRight: 10 }}
-                      />
-                      <button onClick={() => toggleEdit(category, idx)}>Fertig</button>
-                    </>
-                  ) : (
-                    <>
-                      <span>{item.name}</span>
-                      <span>{item.preis.toFixed(2)} CHF</span>
-                      <button
-                        onClick={() => toggleEdit(category, idx)}
-                        title="Bearbeiten"
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                      >
-                        <FontAwesomeIcon icon={faPen} />
-                      </button>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-          </section>
-        ))}
+      {/* Bildcontainer */}
+      <div style={containerStyle}>
+        <div style={overlayStyle} />
+        {previewMode ? (
+          <>
+            <h1 style={titleStyle}>{title}</h1>
+            <div style={priceStyle}>{price}</div>
+          </>
+        ) : (
+          <>
+            <h1
+              style={titleStyle}
+              contentEditable
+              suppressContentEditableWarning
+              onInput={e => setTitle(e.currentTarget.textContent || '')}
+            >
+              {title}
+            </h1>
+            <div
+              style={priceStyle}
+              contentEditable
+              suppressContentEditableWarning
+              onInput={e => setPrice(e.currentTarget.textContent || '')}
+            >
+              {price}
+            </div>
+          </>
+        )}
       </div>
 
+      {/* PageManagementModal als Modal Fenster */}
       <PageManagementModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         onSave={handleSavePage}
-        pageId={page?._id || ''}
-        initialTitle={page?.title || ''}
-        initialCategory={page?.category || ''}
+        pageId={page._id}
+        initialTitle={page.title}
+        initialCategory={page.category}
       />
     </div>
   );

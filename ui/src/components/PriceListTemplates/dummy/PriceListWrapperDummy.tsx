@@ -15,7 +15,7 @@ const PriceListWrapper: React.FC = () => {
       return <PriceListTemplateDummy pageId={pageId} previewMode={false} />;
     }
     if (selectedTemplate === "alternative") {
-      return <PriceListTemplateAlternativeDummy pageId={pageId} previewMode={false} />;
+      return <PriceListTemplateAlternativeDummy/>;
     }
     return null;
   };
