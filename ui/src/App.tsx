@@ -3,25 +3,29 @@ import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-
 import PriceListTemplateWithDatabase from "./components/PriceListTemplates/PriceListTemplateWithDatabase";
 import PriceListTemplateDummy from "./components/PriceListTemplates/PriceListTemplateDummy";
 import PagesManager from "./components/PagesManager/PageManager";
+import PriceListWrapper from "./components/PriceListTemplates/PriceListWrapper";
+import PriceListPreviewWrapper from "./components/PriceListTemplates/PriceListPreviewWrapper";
 
-const PriceListWrapper: React.FC = () => {
-  const { pageId } = useParams<{ pageId: string }>();
-  if (!pageId) return <Navigate to="/" replace />;
-  const isProd = process.env.REACT_APP_PROD === "true";
-  if (isProd)
-    return <PriceListTemplateWithDatabase pageId={pageId} previewMode={false} />;
-  return <PriceListTemplateDummy pageId={pageId} previewMode={false} />;
 
-};
 
-const PriceListPreviewWrapper: React.FC = () => {
-  const { pageId } = useParams<{ pageId: string }>();
-  if (!pageId) return <Navigate to="/" replace />;
-  const isProd = process.env.NODE_ENV === "production";
-  if (isProd)
-    return <PriceListTemplateWithDatabase pageId={pageId} previewMode={true} />;
-  return <PriceListTemplateDummy pageId={pageId} previewMode={true} />;
-};
+// const PriceListWrapper: React.FC = () => {
+//   const { pageId } = useParams<{ pageId: string }>();
+//   if (!pageId) return <Navigate to="/" replace />;
+//   const isProd = process.env.REACT_APP_PROD === "true";
+//   if (isProd)
+//     return <PriceListTemplateWithDatabase pageId={pageId} previewMode={false} />;
+//   return <PriceListTemplateDummy pageId={pageId} previewMode={false} />;
+
+// };
+
+// const PriceListPreviewWrapper: React.FC = () => {
+//   const { pageId } = useParams<{ pageId: string }>();
+//   if (!pageId) return <Navigate to="/" replace />;
+//   const isProd = process.env.NODE_ENV === "production";
+//   if (isProd)
+//     return <PriceListTemplateWithDatabase pageId={pageId} previewMode={true} />;
+//   return <PriceListTemplateDummy pageId={pageId} previewMode={true} />;
+// };
 
 const App: React.FC = () => (
   <BrowserRouter>

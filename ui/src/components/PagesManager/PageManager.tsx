@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import PageManagementModal from "../PageManagementModals/PageManagementModal";
 
 interface Page {
@@ -14,6 +15,8 @@ const PagesManager: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  const navigate = useNavigate();
 
   const fetchPages = async () => {
     setLoading(true);
@@ -63,7 +66,6 @@ const PagesManager: React.FC = () => {
     }
   };
 
-  // Neue Funktion: Seite löschen
   const handleDelete = async (id: string) => {
     if (!window.confirm("Seite wirklich löschen?")) return;
     try {
@@ -86,14 +88,48 @@ const PagesManager: React.FC = () => {
       ) : pages.length === 0 ? (
         <p>Keine Seiten vorhanden.</p>
       ) : (
-        <ul>
+        <ul style={{ listStyleType: "none", padding: 0 }}>
           {pages.map((page) => (
-            <li key={page._id} style={{ marginBottom: 10 }}>
-              <b>{page.title}</b> - <i>{page.category}</i>{" "}
-              <button onClick={() => handleSelectPage(page)}>Bearbeiten</button>{" "}
-              <button onClick={() => handleDelete(page._id)} style={{color: "red"}}>
-                Löschen
-              </button>
+            <li
+              key={page._id}
+              style={{
+                marginBottom: 10,
+                cursor: "pointer",
+                padding: "8px 12px",
+                border: "1px solid #ccc",
+                borderRadius: 6,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <div
+                onClick={() => navigate(`/edit/${page._id}`)}
+                style={{ flexGrow: 1, color: "#007bff", textDecoration: "underline" }}
+                title="Zur Edit-Seite navigieren"
+              >
+                <b>{page.title}</b> - <i>{page.category}</i>
+              </div>
+              <div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSelectPage(page);
+                  }}
+                  style={{ marginRight: 8 }}
+                >
+                  Bearbeiten
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(page._id);
+                  }}
+                  style={{ color: "red" }}
+                >
+                  Löschen
+                </button>
+              </div>
             </li>
           ))}
         </ul>
