@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Link, useParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFloppyDisk, faEye, faPen } from '@fortawesome/free-solid-svg-icons';
 import Icon from '../../IconLibrary/IconLibrary';
 import PageManagementModal from '../../PageManagementModals/PageManagementModal';
 
@@ -97,28 +97,10 @@ const columnStyle: React.CSSProperties = {
 };
 
 const PriceListTemplateDummy: React.FC<Props> = (props) => {
-  const { pageId: propPageId, previewMode = false } = props;
-  const { pageId: paramPageId } = useParams<{ pageId: string }>();
-  const pageId = propPageId || paramPageId || '';
-
-  const [page, setPage] = useState<Page | null>(null);
+  const [page, setPage] = useState<Page | null>(dummyPage);
   const [editing, setEditing] = useState<{ [category: string]: { [index: number]: boolean } }>({});
+  const [previewMode, setPreviewMode] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-
-  // Fetch page data
-  useEffect(() => {
-    if (!pageId) return;
-    axios.get(`/api/pages/${pageId}`)
-      .then(res => setPage(res.data))
-      .catch(() => {
-        // Fallback auf Dummy-Daten bei Fehler
-        setPage(dummyPage);
-      });
-  }, [pageId]);
-
-  if (!page) return <div>Lade Preisliste...</div>;
-
-  // Funktionen toggleEdit, handleChange etc. unverändert
 
   const toggleEdit = (category: string, index: number) => {
     if (previewMode) return;
@@ -127,7 +109,7 @@ const PriceListTemplateDummy: React.FC<Props> = (props) => {
       [category]: {
         ...prev[category],
         [index]: !prev[category]?.[index],
-      },
+      }
     }));
   };
 
@@ -148,22 +130,9 @@ const PriceListTemplateDummy: React.FC<Props> = (props) => {
     setPage({ ...page, content: newContent });
   };
 
-  const saveChanges = async () => {
+  const saveChanges = () => {
     if (!page || previewMode) return;
-    if (page._id === dummyPage._id) {
-      alert('Dummy-Daten: Speichern simuliert');
-      return;
-    }
-    try {
-      await axios.put(`/api/pages/${page._id}`, {
-        title: page.title,
-        category: page.category,
-        content: page.content,
-      });
-      alert('Preisliste gespeichert');
-    } catch {
-      alert('Fehler beim Speichern');
-    }
+    alert('Preisliste gespeichert (Dummy-Daten, keine Backend-Anbindung)');
   };
 
   const handleSavePage = (title: string, category: string) => {
@@ -171,44 +140,49 @@ const PriceListTemplateDummy: React.FC<Props> = (props) => {
     setModalOpen(false);
   };
 
+  if (!page) return <div>Lade Preisliste...</div>;
+
   return (
     <div style={containerStyle}>
-      Dummy
-      {!previewMode && (
-        
-        <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
-          <button
-            onClick={() => setModalOpen(true)}
-            title="Seitenverwaltung öffnen"
-            style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-          >
-            <Icon name="cog" size="lg" />
-          </button>
 
-          <Link to={`/preview/${pageId}`} title="Vorschau" style={{ color: 'inherit', display: 'inline-block' }}>
-            <div style={{ cursor: 'pointer' }}>
-              <Icon name="eye" size="lg" />
-            </div>
-          </Link>
 
-          <button
-            onClick={saveChanges}
-            title="Speichern"
-            style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-          >
-            <Icon name="floppyDisk" size="lg" />
-          </button>
-        </div>
-      )}
+      {/* Steuerungsbuttons rechts oben */}
+      <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
+        <button
+          onClick={() => setPreviewMode(!previewMode)}
+          title={previewMode ? "Bearbeitungsmodus" : "Vorschau umschalten"}
+          style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+        >
+          <FontAwesomeIcon icon={faEye} size="lg" />
+        </button>
+        {!previewMode && (
+          <>
+            <button
+              onClick={() => setModalOpen(true)}
+              title="Seitenverwaltung öffnen"
+              style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+            >
+              <Icon name="cog" size="lg" />
+            </button>
+            <button
+              onClick={saveChanges}
+              title="Speichern"
+              style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+            >
+              <FontAwesomeIcon icon={faFloppyDisk} size="lg" />
+            </button>
+          </>
+        )}
+      </div>
 
       <div style={columnStyle}>
         {['Pizzen', 'Nudle'].map(category => (
           <section key={category}>
             <h2 style={sectionStyle}>{category}</h2>
-            {(page.content[category] || []).map((item, idx) => {
+            {(page.content?.[category] || []).map((item, idx) => {
               const isEditing = editing[category]?.[idx] || false;
               return (
-                <div key={idx} style={itemStyle(idx === (page.content[category]?.length || 0) - 1)}>
+                <div key={idx} style={itemStyle(idx === (page.content?.[category]?.length || 0) - 1)}>
                   {previewMode ? (
                     <>
                       <span>{item.name}</span>
@@ -238,7 +212,7 @@ const PriceListTemplateDummy: React.FC<Props> = (props) => {
                         title="Bearbeiten"
                         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                       >
-                        <Icon name="pen" />
+                        <FontAwesomeIcon icon={faPen} />
                       </button>
                     </>
                   )}
@@ -248,15 +222,14 @@ const PriceListTemplateDummy: React.FC<Props> = (props) => {
           </section>
         ))}
       </div>
-
       <div style={columnStyle}>
         {['Kaltgetränk', 'Café'].map(category => (
           <section key={category}>
             <h2 style={sectionStyle}>{category}</h2>
-            {(page.content[category] || []).map((item, idx) => {
+            {(page.content?.[category] || []).map((item, idx) => {
               const isEditing = editing[category]?.[idx] || false;
               return (
-                <div key={idx} style={itemStyle(idx === (page.content[category]?.length || 0) - 1)}>
+                <div key={idx} style={itemStyle(idx === (page.content?.[category]?.length || 0) - 1)}>
                   {previewMode ? (
                     <>
                       <span>{item.name}</span>
@@ -286,7 +259,7 @@ const PriceListTemplateDummy: React.FC<Props> = (props) => {
                         title="Bearbeiten"
                         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                       >
-                        <Icon name="pen" />
+                        <FontAwesomeIcon icon={faPen} />
                       </button>
                     </>
                   )}
