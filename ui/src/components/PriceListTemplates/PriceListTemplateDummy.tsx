@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-
-// FontAwesome Importe
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFloppyDisk, faEye, faPen } from '@fortawesome/free-solid-svg-icons';
+import React, { useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import Icon from "../IconLibrary/IconLibrary";
+import PageManagementModal from "../PageManagementModals/PageManagementModal";
 
 interface ContentItem {
   name: string;
@@ -21,45 +20,14 @@ interface Page {
 }
 
 interface Props {
-  pageId: string;
+  pageId?: string;
+  previewMode?: boolean;
 }
 
-// Styles (inline als Beispiel)
-const sectionStyle = {
-  borderBottom: "2px solid #ccc",
-  paddingBottom: "6px",
-  marginBottom: "16px",
-};
-
-const itemStyle = (isLast: boolean) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  padding: "10px 0",
-  borderBottom: isLast ? "none" : "1px solid #eee",
-});
-
-const containerStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  maxWidth: 900,
-  margin: "40px auto",
-  backgroundColor: "#fff",
-  color: "#111",
-  fontFamily: "'Montserrat', sans-serif",
-  padding: 20,
-  borderRadius: 12,
-  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-  position: "relative" as "relative",
-};
-
-const columnStyle = {
-  flexBasis: "48%",
-};
-
 const dummyPage: Page = {
-  _id: "dummy-id",
-  title: "Preisliste Test",
-  category: "Testkategorie",
+  _id: "68c308d3c5b64fe319d8277f",
+  title: "Demo Preisliste",
+  category: "Demo Kategorie",
   content: {
     Pizzen: [
       { name: "Margherita", preis: 12.5 },
@@ -96,19 +64,63 @@ const dummyPage: Page = {
   },
 };
 
-const PriceListTemplateDummy: React.FC<Props> = ({ pageId }) => {
-  const [page, setPage] = useState<Page | null>(dummyPage);
+const sectionStyle: React.CSSProperties = {
+  borderBottom: "2px solid #ccc",
+  paddingBottom: 6,
+  marginBottom: 16,
+};
+
+const itemStyle = (isLast: boolean): React.CSSProperties => ({
+  display: "flex",
+  justifyContent: "space-between",
+  padding: "10px 0",
+  borderBottom: isLast ? "none" : "1px solid #eee",
+});
+
+const containerStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  maxWidth: 900,
+  margin: "40px auto",
+  backgroundColor: "#fff",
+  color: "#111",
+  fontFamily: "'Montserrat', sans-serif",
+  padding: 20,
+  borderRadius: 12,
+  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
+  position: "relative",
+};
+
+const columnStyle: React.CSSProperties = {
+  flexBasis: "48%",
+};
+
+const PriceListTemplateDummy: React.FC<Props> = ({ pageId, previewMode = false }) => {
+  const params = useParams<{ pageId: string }>();
+  const effectivePageId = pageId || params.pageId || "";
+
+  const [page, setPage] = useState<Page | null>(null);
   const [editing, setEditing] = useState<{ [category: string]: { [index: number]: boolean } }>({});
-  const [previewMode, setPreviewMode] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    if (effectivePageId === dummyPage._id) {
+      setPage(dummyPage);
+    } else {
+      setPage(null);
+    }
+  }, [effectivePageId]);
+
+  if (!page) return <div>Preisliste nicht gefunden oder falsche ID.</div>;
 
   const toggleEdit = (category: string, index: number) => {
     if (previewMode) return;
-    setEditing(prev => ({
+    setEditing((prev) => ({
       ...prev,
       [category]: {
         ...prev[category],
         [index]: !prev[category]?.[index],
-      }
+      },
     }));
   };
 
@@ -123,46 +135,70 @@ const PriceListTemplateDummy: React.FC<Props> = ({ pageId }) => {
     const items = [...(newContent[category] || [])];
     items[index] = {
       ...items[index],
-      [field]: field === 'preis' ? Number(value) : value,
+      [field]: field === "preis" ? Number(value) : value,
     };
     newContent[category] = items;
     setPage({ ...page, content: newContent });
   };
 
-  const saveChanges = () => {
-    if (!page || previewMode) return;
-    alert('Preisliste gespeichert (Dummy-Daten, keine Backend-Anbindung)');
+  const saveChanges = async () => {
+    if (previewMode) {
+      alert("Speichern im Preview-Modus nicht erlaubt.");
+      return;
+    }
+    alert("Speichern mit Dummy-Daten simuliert.");
   };
 
-  if (!page) return <div>Lade Preisliste...</div>;
+  const handleSavePage = (title: string, category: string) => {
+    alert(`Seite speichern: ${title} (Kategorie: ${category})`);
+    setModalOpen(false);
+  };
 
   return (
     <div style={containerStyle}>
-      <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
-        <button
-          onClick={() => setPreviewMode(!previewMode)}
-          title="Vorschau umschalten"
-          style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-        >
-          <FontAwesomeIcon icon={faEye} size="lg" />
-        </button>
-        <button
-          onClick={saveChanges}
-          title="Speichern"
-          style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-        >
-          <FontAwesomeIcon icon={faFloppyDisk} size="lg" />
-        </button>
-      </div>
+      {!previewMode && (
+        <div style={{ position: "absolute", top: 16, right: 16, display: "flex", gap: 16 }}>
+          <button
+            onClick={() => setModalOpen(true)}
+            title="Seitenverwaltung öffnen"
+            style={{ cursor: "pointer", background: "none", border: "none", padding: 0 }}
+          >
+            <Icon name="cog" size="lg" />
+          </button>
+
+          {effectivePageId && (
+            <Link
+              to={`/preview/${effectivePageId}`}
+              title="Vorschau"
+              style={{ color: "inherit", display: "inline-block" }}
+            >
+              <div style={{ cursor: "pointer" }}>
+                <Icon name="eye" size="lg" />
+              </div>
+            </Link>
+          )}
+
+          <button
+            onClick={saveChanges}
+            title="Speichern"
+            style={{ cursor: "pointer", background: "none", border: "none", padding: 0 }}
+          >
+            <Icon name="floppyDisk" size="lg" />
+          </button>
+        </div>
+      )}
 
       <div style={columnStyle}>
-        {["Pizzen", "Nudle"].map(category => (
+        {["Pizzen", "Nudle"].map((category) => (
           <section key={category}>
             <h2 style={sectionStyle}>{category}</h2>
             {(page.content[category] || []).map((item, idx) => {
               const isEditing = editing[category]?.[idx] || false;
               return (
-                <div key={idx} style={itemStyle(idx === (page.content[category]?.length || 0) - 1)}>
+                <div
+                  key={idx}
+                  style={itemStyle(idx === (page.content[category]?.length || 0) - 1)}
+                >
                   {previewMode ? (
                     <>
                       <span>{item.name}</span>
@@ -172,13 +208,13 @@ const PriceListTemplateDummy: React.FC<Props> = ({ pageId }) => {
                     <>
                       <input
                         value={item.name}
-                        onChange={e => handleChange(category, idx, 'name', e.target.value)}
+                        onChange={(e) => handleChange(category, idx, "name", e.target.value)}
                         style={{ flex: 2, marginRight: 10 }}
                       />
                       <input
                         type="number"
                         value={item.preis}
-                        onChange={e => handleChange(category, idx, 'preis', Number(e.target.value))}
+                        onChange={(e) => handleChange(category, idx, "preis", Number(e.target.value))}
                         style={{ width: 80, marginRight: 10 }}
                       />
                       <button onClick={() => toggleEdit(category, idx)}>Fertig</button>
@@ -187,26 +223,33 @@ const PriceListTemplateDummy: React.FC<Props> = ({ pageId }) => {
                     <>
                       <span>{item.name}</span>
                       <span>{item.preis.toFixed(2)} CHF</span>
-                      <button onClick={() => toggleEdit(category, idx)} title="Bearbeiten">
-                        <FontAwesomeIcon icon={faPen} />
+                      <button
+                        onClick={() => toggleEdit(category, idx)}
+                        title="Bearbeiten"
+                        style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                      >
+                        <Icon name="pen" />
                       </button>
                     </>
                   )}
                 </div>
-              )
+              );
             })}
           </section>
         ))}
       </div>
 
       <div style={columnStyle}>
-        {["Kaltgetränk", "Café"].map(category => (
+        {["Kaltgetränk", "Café"].map((category) => (
           <section key={category}>
             <h2 style={sectionStyle}>{category}</h2>
             {(page.content[category] || []).map((item, idx) => {
               const isEditing = editing[category]?.[idx] || false;
               return (
-                <div key={idx} style={itemStyle(idx === (page.content[category]?.length || 0) - 1)}>
+                <div
+                  key={idx}
+                  style={itemStyle(idx === (page.content[category]?.length || 0) - 1)}
+                >
                   {previewMode ? (
                     <>
                       <span>{item.name}</span>
@@ -216,13 +259,13 @@ const PriceListTemplateDummy: React.FC<Props> = ({ pageId }) => {
                     <>
                       <input
                         value={item.name}
-                        onChange={e => handleChange(category, idx, "name", e.target.value)}
+                        onChange={(e) => handleChange(category, idx, "name", e.target.value)}
                         style={{ flex: 2, marginRight: 10 }}
                       />
                       <input
                         type="number"
                         value={item.preis}
-                        onChange={e => handleChange(category, idx, "preis", Number(e.target.value))}
+                        onChange={(e) => handleChange(category, idx, "preis", Number(e.target.value))}
                         style={{ width: 80, marginRight: 10 }}
                       />
                       <button onClick={() => toggleEdit(category, idx)}>Fertig</button>
@@ -231,17 +274,30 @@ const PriceListTemplateDummy: React.FC<Props> = ({ pageId }) => {
                     <>
                       <span>{item.name}</span>
                       <span>{item.preis.toFixed(2)} CHF</span>
-                      <button onClick={() => toggleEdit(category, idx)} title="Bearbeiten">
-                        <FontAwesomeIcon icon={faPen} />
+                      <button
+                        onClick={() => toggleEdit(category, idx)}
+                        title="Bearbeiten"
+                        style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                      >
+                        <Icon name="pen" />
                       </button>
                     </>
                   )}
                 </div>
-              )
+              );
             })}
           </section>
         ))}
       </div>
+
+      <PageManagementModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSavePage}
+        pageId={page?._id || ""}
+        initialTitle={page?.title || ""}
+        initialCategory={page?.category || ""}
+      />
     </div>
   );
 };

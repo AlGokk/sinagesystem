@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
-// FontAwesome Importe
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFloppyDisk, faEye, faPen } from '@fortawesome/free-solid-svg-icons';
+import { Link, useParams } from 'react-router-dom';
+import Icon from '../IconLibrary/IconLibrary'; // Deine zentrale Icon-Komponente
+import PageManagementModal from '../PageManagementModals/PageManagementModal';
 
 interface ContentItem {
   name: string;
@@ -22,47 +21,52 @@ interface Page {
 }
 
 interface Props {
-  pageId: string;
+  pageId?: string;          // Kann via Prop oder via useParams kommen
+  previewMode?: boolean;    // Steuerung für Preview (Icons/Buttons ausblenden)
 }
 
-// Styles (inline als Beispiel)
-const sectionStyle = {
-  borderBottom: "2px solid #ccc",
-  paddingBottom: "6px",
-  marginBottom: "16px",
+const sectionStyle: React.CSSProperties = {
+  borderBottom: '2px solid #ccc',
+  paddingBottom: '6px',
+  marginBottom: '16px',
 };
 
-const itemStyle = (isLast: boolean) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  padding: "10px 0",
-  borderBottom: isLast ? "none" : "1px solid #eee",
+const itemStyle = (isLast: boolean): React.CSSProperties => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  padding: '10px 0',
+  borderBottom: isLast ? 'none' : '1px solid #eee',
 });
 
-const containerStyle = {
-  display: "flex",
-  justifyContent: "space-between",
+const containerStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'space-between',
   maxWidth: 900,
-  margin: "40px auto",
-  backgroundColor: "#fff",
-  color: "#111",
+  margin: '40px auto',
+  backgroundColor: '#fff',
+  color: '#111',
   fontFamily: "'Montserrat', sans-serif",
   padding: 20,
   borderRadius: 12,
-  boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-  position: "relative" as "relative",
+  boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+  position: 'relative',
 };
 
-const columnStyle = {
-  flexBasis: "48%",
+const columnStyle: React.CSSProperties = {
+  flexBasis: '48%',
 };
 
-const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
+const PriceListTemplate: React.FC<Props> = (props) => {
+  const { pageId: propPageId, previewMode = false } = props;
+  const { pageId: paramPageId } = useParams<{ pageId: string }>();
+  const pageId = propPageId || paramPageId || '';
+
   const [page, setPage] = useState<Page | null>(null);
   const [editing, setEditing] = useState<{ [category: string]: { [index: number]: boolean } }>({});
-  const [previewMode, setPreviewMode] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
+    if (!pageId) return;
     axios.get(`/api/pages/${pageId}`)
       .then(res => setPage(res.data))
       .catch(() => alert('Fehler beim Laden der Preisliste'));
@@ -71,7 +75,7 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
   if (!page) return <div>Lade Preisliste...</div>;
 
   const toggleEdit = (category: string, index: number) => {
-    if (previewMode) return;
+    if (previewMode) return; // Keine Editierfunktion im Preview
     setEditing(prev => ({
       ...prev,
       [category]: {
@@ -85,7 +89,7 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
     category: string,
     index: number,
     field: keyof ContentItem,
-    value: string | number
+    value: string | number,
   ) => {
     if (!page || previewMode) return;
     const newContent = { ...page.content };
@@ -112,28 +116,45 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
     }
   };
 
+  const handleSavePage = (title: string, category: string) => {
+    alert(`Seite speichern: ${title} (Kategorie: ${category})`);
+    setModalOpen(false);
+    // Optional weitere API Calls zum Speichern von Seite
+  };
+
   return (
     <div style={containerStyle}>
-      {/* Icons über Buttons mit FontAwesome */}
-      <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
-        <button
-          onClick={() => setPreviewMode(!previewMode)}
-          title="Vorschau umschalten"
-          style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-        >
-          <FontAwesomeIcon icon={faEye} size="lg" />
-        </button>
-        <button
-          onClick={saveChanges}
-          title="Speichern"
-          style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-        >
-          <FontAwesomeIcon icon={faFloppyDisk} size="lg" />
-        </button>
-      </div>
+      {/* Toolbar nur, wenn nicht Preview-Modus */}
+      {!previewMode && (
+        <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
+          <button
+            onClick={() => setModalOpen(true)}
+            title="Seitenverwaltung öffnen"
+            style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+          >
+            <Icon name="cog" size="lg" />
+          </button>
 
+          {/* Eye Icon als Link zur Preview-Route */}
+          <Link to={`/preview/${pageId}`} title="Vorschau" style={{ color: 'inherit', display: 'inline-block' }}>
+            <div style={{ cursor: 'pointer' }}>
+              <Icon name="eye" size="lg" />
+            </div>
+          </Link>
+
+          <button
+            onClick={saveChanges}
+            title="Speichern"
+            style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+          >
+            <Icon name="floppyDisk" size="lg" />
+          </button>
+        </div>
+      )}
+
+      {/* Erste Spalte */}
       <div style={columnStyle}>
-        {["Pizzen", "Nudle"].map(category => (
+        {['Pizzen', 'Nudle'].map(category => (
           <section key={category}>
             <h2 style={sectionStyle}>{category}</h2>
             {(page.content[category] || []).map((item, idx) => {
@@ -169,7 +190,7 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
                         title="Bearbeiten"
                         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                       >
-                        <FontAwesomeIcon icon={faPen} />
+                        <Icon name="pen" />
                       </button>
                     </>
                   )}
@@ -180,8 +201,9 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
         ))}
       </div>
 
+      {/* Zweite Spalte */}
       <div style={columnStyle}>
-        {["Kaltgetränk", "Café"].map(category => (
+        {['Kaltgetränk', 'Café'].map(category => (
           <section key={category}>
             <h2 style={sectionStyle}>{category}</h2>
             {(page.content[category] || []).map((item, idx) => {
@@ -197,13 +219,13 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
                     <>
                       <input
                         value={item.name}
-                        onChange={e => handleChange(category, idx, "name", e.target.value)}
+                        onChange={e => handleChange(category, idx, 'name', e.target.value)}
                         style={{ flex: 2, marginRight: 10 }}
                       />
                       <input
                         type="number"
                         value={item.preis}
-                        onChange={e => handleChange(category, idx, "preis", Number(e.target.value))}
+                        onChange={e => handleChange(category, idx, 'preis', Number(e.target.value))}
                         style={{ width: 80, marginRight: 10 }}
                       />
                       <button onClick={() => toggleEdit(category, idx)}>Fertig</button>
@@ -217,7 +239,7 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
                         title="Bearbeiten"
                         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                       >
-                        <FontAwesomeIcon icon={faPen} />
+                        <Icon name="pen" />
                       </button>
                     </>
                   )}
@@ -227,6 +249,15 @@ const PriceListTemplate: React.FC<Props> = ({ pageId }) => {
           </section>
         ))}
       </div>
+
+      <PageManagementModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSavePage}
+        pageId={page?._id || ''}
+        initialTitle={page?.title || ''}
+        initialCategory={page?.category || ''}
+      />
     </div>
   );
 };
