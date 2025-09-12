@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import PriceListTemplateWithDatabase from "./components/PriceListTemplates/PriceListTemplateWithDatabase";
 import PriceListTemplateDummy from "./components/PriceListTemplates/PriceListTemplateDummy";
+import PagesManager from "./components/PagesManager/PageManager";
 
 const PriceListWrapper: React.FC = () => {
   const { pageId } = useParams<{ pageId: string }>();
@@ -26,6 +27,7 @@ const App: React.FC = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Navigate to="/edit/68c308d3c5b64fe319d8277f" replace />} />
+       <Route path="/pages" element={<PagesManager />} />
       <Route path="/edit/:pageId" element={<PriceListWrapper />} />
       <Route path="/preview/:pageId" element={<PriceListPreviewWrapper />} />
     </Routes>

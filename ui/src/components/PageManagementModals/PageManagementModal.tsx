@@ -5,9 +5,10 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (title: string, category: string) => void;
-  pageId: string;  // ID der Seite, um sie zu speichern
+  pageId: string;
   initialTitle?: string;
   initialCategory?: string;
+  saving?: boolean;
 }
 
 const PageManagementModal: React.FC<ModalProps> = ({
@@ -16,11 +17,11 @@ const PageManagementModal: React.FC<ModalProps> = ({
   onSave,
   pageId,
   initialTitle = "",
-  initialCategory = ""
+  initialCategory = "",
+  saving = false,
 }) => {
   const [title, setTitle] = useState(initialTitle);
   const [category, setCategory] = useState(initialCategory);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -31,33 +32,19 @@ const PageManagementModal: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleSave = async () => {
+  const handleSubmit = () => {
     if (title.trim() === "" || category.trim() === "") {
       alert("Bitte alle Felder ausfüllen.");
       return;
     }
-    setSaving(true);
-    try {
-      const response = await axios.put(`/api/pages/${pageId}`, {
-        title,
-        category,
-      });
-      alert("Seite erfolgreich gespeichert.");
-      onSave(title, category); // Informiere Parent über Änderung
-      onClose();
-    } catch (error) {
-      alert("Fehler beim Speichern der Seite.");
-      console.error(error);
-    } finally {
-      setSaving(false);
-    }
+    onSave(title, category);
   };
 
   return (
     <>
       <div style={darkBGStyle} onClick={onClose} />
       <div style={centeredStyle}>
-        <div style={modalStyle} onClick={e => e.stopPropagation()}>
+        <div style={modalStyle} onClick={(e) => e.stopPropagation()}>
           <div style={modalHeaderStyle}>
             <h3>Seite verwalten</h3>
             <button onClick={onClose} style={closeBtnStyle} disabled={saving}>
@@ -69,7 +56,7 @@ const PageManagementModal: React.FC<ModalProps> = ({
               Seitentitel:
               <input
                 value={title}
-                onChange={e => setTitle(e.target.value)}
+                onChange={(e) => setTitle(e.target.value)}
                 style={inputStyle}
                 placeholder="Titel eingeben"
                 disabled={saving}
@@ -79,7 +66,7 @@ const PageManagementModal: React.FC<ModalProps> = ({
               Kategorie:
               <input
                 value={category}
-                onChange={e => setCategory(e.target.value)}
+                onChange={(e) => setCategory(e.target.value)}
                 style={inputStyle}
                 placeholder="Kategorie eingeben"
                 disabled={saving}
@@ -87,10 +74,18 @@ const PageManagementModal: React.FC<ModalProps> = ({
             </label>
           </div>
           <div style={modalFooterStyle}>
-            <button onClick={handleSave} style={saveBtnStyle} disabled={saving}>
+            <button
+              onClick={handleSubmit}
+              style={saveBtnStyle}
+              disabled={saving}
+            >
               {saving ? "Speichert..." : "Speichern"}
             </button>
-            <button onClick={onClose} style={cancelBtnStyle} disabled={saving}>
+            <button
+              onClick={onClose}
+              style={cancelBtnStyle}
+              disabled={saving}
+            >
               Abbrechen
             </button>
           </div>
@@ -100,7 +95,7 @@ const PageManagementModal: React.FC<ModalProps> = ({
   );
 };
 
-// Styles gleich wie vorher
+// Styles wie besprochen
 const darkBGStyle: React.CSSProperties = {
   position: "fixed",
   top: 0,
@@ -162,7 +157,7 @@ const modalFooterStyle: React.CSSProperties = {
   gap: 12,
 };
 const saveBtnStyle: React.CSSProperties = {
-  backgroundColor: "#4CAF50",
+  backgroundColor: "#4caf50",
   color: "white",
   border: "none",
   padding: "8px 16px",
