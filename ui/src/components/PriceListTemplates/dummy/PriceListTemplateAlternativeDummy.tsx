@@ -144,22 +144,6 @@ const PriceListTemplateAlternativeDummy: React.FC<Props> = (props) => {
 
   return (
     <div style={containerStyle}>
-      {/* Header Bild links oben */}
-      <img
-        src="https://www.shutterstock.com/image-photo/tasty-pizza-on-dark-grey-260nw-2499091183.jpg"
-        alt="Pizza Header"
-        style={{
-          position: 'absolute',
-          top: 16,
-          left: 16,
-          width: 300,
-          height: 80,
-          borderRadius: 12,
-          objectFit: 'cover',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
-        }}
-      />
-
       {/* Steuerungsbuttons rechts oben */}
       <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
         <button
