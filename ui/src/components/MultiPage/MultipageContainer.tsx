@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useMediaQuery } from 'react-responsive';
 import Header from './Header';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,18 +12,17 @@ const GenericPage: React.FC<{
   title: string;
   isFullscreen?: boolean;
   fullscreenRef?: React.RefObject<HTMLDivElement>;
-}> = ({ title, isFullscreen, fullscreenRef }) => {
-  const DIN_A4_WIDTH = 794;
-  const DIN_A4_HEIGHT = 1123;
-
+  pageWidth: number | string;
+  pageHeight: number | string;
+}> = ({ title, isFullscreen, fullscreenRef, pageWidth, pageHeight }) => {
   const pageStyle: React.CSSProperties = {
     backgroundColor: '#fff',
     borderRadius: isFullscreen ? 0 : 8,
     boxShadow: isFullscreen ? 'none' : '0 2px 10px rgba(0,0,0,0.1)',
     marginBottom: isFullscreen ? 0 : 40,
     padding: isFullscreen ? '40px 60px' : 40,
-    width: isFullscreen ? '100vw' : DIN_A4_WIDTH,
-    height: isFullscreen ? '100vh' : DIN_A4_HEIGHT,
+    width: isFullscreen ? '100vw' : pageWidth,
+    height: isFullscreen ? '100vh' : pageHeight,
     boxSizing: 'border-box',
     overflow: 'auto',
     position: 'relative',
@@ -45,10 +45,32 @@ const GenericPage: React.FC<{
   );
 };
 
-
 const MultiPageContainer: React.FC = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
+
+  // Bildschirmgrößen-Abfragen via react-responsive
+  const isLargeScreen = useMediaQuery({ minWidth: 1920 });
+  const isDesktop = useMediaQuery({ minWidth: 1200, maxWidth: 1919 });
+  const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1199 });
+  const isMobile = useMediaQuery({ maxWidth: 767 });
+
+  // Dynamische Breite/Höhe je nach Bildschirmtyp
+  const pageWidth = isLargeScreen
+    ? 1123
+    : isDesktop
+    ? 794
+    : isTablet
+    ? '90vw'
+    : '100vw';
+
+  const pageHeight = isLargeScreen
+    ? 1587
+    : isDesktop
+    ? 1123
+    : isTablet
+    ? 'auto'
+    : 'auto';
 
   const [pages, setPages] = useState<{ id: string; title: string }[]>([{ id: '1', title: 'Seite 1' }]);
   const [fullscreenPageId, setFullscreenPageId] = useState<string | null>(null);
@@ -197,8 +219,8 @@ const MultiPageContainer: React.FC = () => {
                 <div
                   style={{
                     position: 'absolute',
-                    top: -40,   // knapp über der Seite
-                    right: 0,   // rechtsbündig am A4 Container
+                    top: -40,
+                    right: 0,
                     display: 'flex',
                     gap: '8px',
                   }}
@@ -226,11 +248,12 @@ const MultiPageContainer: React.FC = () => {
                 </div>
               )}
 
-              {/* DIN-A4 Page */}
               <GenericPage
                 title={page.title}
                 isFullscreen={fullscreenPageId === page.id}
                 fullscreenRef={page.id === '1' ? fullscreenRef : undefined}
+                pageWidth={pageWidth}
+                pageHeight={pageHeight}
               />
             </div>
           </div>
