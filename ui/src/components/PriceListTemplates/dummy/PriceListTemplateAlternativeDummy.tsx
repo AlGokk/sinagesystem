@@ -45,7 +45,7 @@ const containerStyle: React.CSSProperties = {
   borderRadius: '0 0 16px 16px',
   boxShadow: '0 6px 15px rgba(0,0,0,0.3)',
   overflow: 'hidden',
-  padding: '0 20px',
+
 };
 
 const overlayStyle: React.CSSProperties = {

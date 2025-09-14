@@ -22,15 +22,6 @@ const PriceListWrapper: React.FC = () => {
 
   return (
     <>
-<Menu
-  selectedTemplate={selectedTemplate}
-  onTemplateChange={setSelectedTemplate}
-  backgroundColor="orange"
-  textColor="black"
-  isEditorMode={true} // Editor-Modus anzeigen
-/>
-
-
       <div style={{ padding: 20 }}>
         {renderTemplate()}
       </div>
