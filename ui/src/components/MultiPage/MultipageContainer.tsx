@@ -25,10 +25,7 @@ const GenericPage: React.FC<{
     height: isFullscreen ? '100vh' : DIN_A4_HEIGHT,
     boxSizing: 'border-box',
     overflow: 'auto',
-    position: isFullscreen ? 'fixed' : 'relative',
-    top: isFullscreen ? 0 : undefined,
-    left: isFullscreen ? 0 : undefined,
-    zIndex: isFullscreen ? 5000 : undefined,
+    position: 'relative',
     fontFamily: "'Montserrat', sans-serif",
     fontSize: 18,
     lineHeight: 1.6,
@@ -56,7 +53,6 @@ const MultiPageContainer: React.FC = () => {
   const [pages, setPages] = useState<{ id: string; title: string }[]>([{ id: '1', title: 'Seite 1' }]);
   const [fullscreenPageId, setFullscreenPageId] = useState<string | null>(null);
 
-  // Refs mit dynamischem Map für die Seitencontainer
   const pageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const fullscreenRef = useRef<HTMLDivElement>(null);
 
@@ -110,22 +106,16 @@ const MultiPageContainer: React.FC = () => {
 
   const isFullscreenActive = fullscreenPageId !== null;
 
-const buttonStyle: React.CSSProperties = {
-  padding: '8px 12px',
-  fontSize: '0.9rem',
-  cursor: 'pointer',
-  borderRadius: 6,
-  marginBottom: '6px',
-  border: '1px solid #ccc',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  gap: '6px',
-  transition: 'background-color 0.3s ease',
-  backgroundColor: '#d3d3d3',  // hellgrau
-  color: '#111', // dunkle Schrift, optional
-};
-
+  const buttonStyle: React.CSSProperties = {
+    padding: '6px 10px',
+    borderRadius: 6,
+    cursor: 'pointer',
+    border: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: '#fff',
+  };
 
   const closeFullscreenButtonStyle: React.CSSProperties = {
     position: 'fixed',
@@ -133,7 +123,7 @@ const buttonStyle: React.CSSProperties = {
     right: 20,
     backgroundColor: '#ff4d4d',
     borderRadius: 6,
-    padding: '8px 12px',
+    padding: '10px 14px',
     border: 'none',
     cursor: 'pointer',
     color: 'white',
@@ -147,17 +137,29 @@ const buttonStyle: React.CSSProperties = {
     <div>
       {!isFullscreenActive && <Header />}
 
-      {/* Neue Seitenliste unter Header, über den Seiten */}
       {!isFullscreenActive && (
-        <div style={{ display: 'flex', padding: '10px 20px', overflowX: 'auto', gap: 8, backgroundColor: '#eef2f5' }}>
+        <div
+          style={{
+            display: 'flex',
+            padding: '10px 20px',
+            overflowX: 'auto',
+            gap: 8,
+            backgroundColor: '#eef2f5',
+          }}
+        >
           {pages.map((page) => (
-            <button key={page.id} style={buttonStyle} onClick={() => scrollToPage(page.id)}>
+            <button
+              key={page.id}
+              style={{ ...buttonStyle, backgroundColor: '#d3d3d3', color: '#111' }}
+              onClick={() => scrollToPage(page.id)}
+            >
               {page.title}
             </button>
           ))}
         </div>
       )}
 
+      {/* Roter Button zum Schließen (immer über allem im Vollbild) */}
       {isFullscreenActive && (
         <button
           style={closeFullscreenButtonStyle}
@@ -174,7 +176,6 @@ const buttonStyle: React.CSSProperties = {
           backgroundColor: isFullscreenActive ? '#000' : '#f0f0f0',
           minHeight: '100vh',
           padding: isFullscreenActive ? '0' : '40px',
-          marginTop: isFullscreenActive ? 0 : 0,
           fontFamily: "'Montserrat', sans-serif",
         }}
       >
@@ -184,50 +185,61 @@ const buttonStyle: React.CSSProperties = {
             ref={(el) => (pageRefs.current[page.id] = el)}
             style={{
               display: fullscreenPageId === page.id || fullscreenPageId === null ? 'flex' : 'none',
-              flexDirection: 'row',
-              alignItems: 'flex-start',
-              justifyContent: 'center',
-              gap: '20px',
-              marginBottom: '40px',
+              flexDirection: 'column',
+              alignItems: 'center',
+              marginBottom: '60px',
               scrollMarginTop: 90,
             }}
           >
-            <GenericPage
-              title={page.title}
-              isFullscreen={fullscreenPageId === page.id}
-              fullscreenRef={page.id === '1' ? fullscreenRef : undefined}
-            />
-
-            {!isFullscreenActive && (
-              <div style={{ display: 'flex', flexDirection: 'column', minWidth: '60px' }}>
-                {page.id !== '1' && (
-                  <button
-                    style={{ ...buttonStyle, backgroundColor: '#ff4d4d' }}
-                    onClick={() => deletePage(page.id)}
-                    title="Seite löschen"
-                  >
-                    <img
-                      src="https://cdn-icons-png.flaticon.com/512/484/484662.png"
-                      alt="Löschen"
-                      style={{ width: 20, height: 20 }}
-                    />
-                  </button>
-                )}
-                <button
-                  style={{ ...buttonStyle, backgroundColor: '#007bff', color: '#fff' }}
-                  onClick={() => toggleFullscreen(page.id)}
-                  title={fullscreenPageId === page.id ? "Vollbild schließen" : "Vollbild"}
+            {/* Wrapper für A4 Container + Buttons */}
+            <div style={{ position: 'relative', display: 'inline-block' }}>
+              {!isFullscreenActive && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: -40,   // knapp über der Seite
+                    right: 0,   // rechtsbündig am A4 Container
+                    display: 'flex',
+                    gap: '8px',
+                  }}
                 >
-                  <FontAwesomeIcon icon={fullscreenPageId === page.id ? faCompress : faExpand} />
-                </button>
-              </div>
-            )}
+                  {page.id !== '1' && (
+                    <button
+                      style={{ ...buttonStyle, backgroundColor: '#ff4d4d' }}
+                      onClick={() => deletePage(page.id)}
+                      title="Seite löschen"
+                    >
+                      <img
+                        src="https://cdn-icons-png.flaticon.com/512/484/484662.png"
+                        alt="Löschen"
+                        style={{ width: 18, height: 18 }}
+                      />
+                    </button>
+                  )}
+                  <button
+                    style={{ ...buttonStyle, backgroundColor: '#007bff' }}
+                    onClick={() => toggleFullscreen(page.id)}
+                    title={fullscreenPageId === page.id ? 'Vollbild schließen' : 'Vollbild'}
+                  >
+                    <FontAwesomeIcon icon={fullscreenPageId === page.id ? faCompress : faExpand} />
+                  </button>
+                </div>
+              )}
+
+              {/* DIN-A4 Page */}
+              <GenericPage
+                title={page.title}
+                isFullscreen={fullscreenPageId === page.id}
+                fullscreenRef={page.id === '1' ? fullscreenRef : undefined}
+              />
+            </div>
           </div>
         ))}
+
         {!isFullscreenActive && (
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
             <button
-              style={{ ...buttonStyle, backgroundColor: '#28a745', color: '#fff' }}
+              style={{ ...buttonStyle, backgroundColor: '#28a745' }}
               onClick={addPage}
               title="Neue Seite hinzufügen"
             >
