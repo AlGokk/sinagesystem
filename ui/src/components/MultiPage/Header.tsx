@@ -32,7 +32,7 @@ const Header: React.FC = () => {
           }}
         >
           <FontAwesomeIcon icon={faHome} />
-          Seitenverwaltung
+          Digital Signage System
         </Link>
       </nav>
     </header>

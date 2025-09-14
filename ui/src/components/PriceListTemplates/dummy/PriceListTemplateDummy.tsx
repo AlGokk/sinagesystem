@@ -160,34 +160,6 @@ const PriceListTemplateDummy: React.FC<Props> = (props) => {
         }}
       />
 
-      {/* Steuerungsbuttons rechts oben */}
-      <div style={{ position: 'absolute', top: 16, right: 16, display: 'flex', gap: 16 }}>
-        <button
-          onClick={() => setPreviewMode(!previewMode)}
-          title={previewMode ? "Bearbeitungsmodus" : "Vorschau umschalten"}
-          style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-        >
-          <FontAwesomeIcon icon={faEye} size="lg" />
-        </button>
-        {!previewMode && (
-          <>
-            <button
-              onClick={() => setModalOpen(true)}
-              title="Seitenverwaltung öffnen"
-              style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-            >
-              <Icon name="cog" size="lg" />
-            </button>
-            <button
-              onClick={saveChanges}
-              title="Speichern"
-              style={{ cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
-            >
-              <FontAwesomeIcon icon={faFloppyDisk} size="lg" />
-            </button>
-          </>
-        )}
-      </div>
 
       <div style={columnStyle}>
         {['Pizzen', 'Nudle'].map(category => (
