@@ -41,7 +41,7 @@ const GenericPage: React.FC<{
     <div ref={fullscreenRef} style={pageStyle}>
       {/* Nur auf Seite 1 die Preisliste anzeigen */}
       {title === 'Seite 1' ? (
-        <PriceListTemplateDummy />
+        <PriceListTemplateDummy previewMode={isFullscreen ?? false} />
       ) : (
         <>
           <h2>{title}</h2>

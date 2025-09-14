@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFloppyDisk, faEye, faPen } from '@fortawesome/free-solid-svg-icons';
 import Icon from '../../IconLibrary/IconLibrary';
@@ -24,6 +24,8 @@ interface Props {
   pageId?: string;
   previewMode?: boolean;
 }
+
+
 
 const dummyPage: Page = {
   _id: "68c308d3c5b64fe319d8277f",
@@ -99,8 +101,14 @@ const columnStyle: React.CSSProperties = {
 const PriceListTemplateDummy: React.FC<Props> = (props) => {
   const [page, setPage] = useState<Page | null>(dummyPage);
   const [editing, setEditing] = useState<{ [category: string]: { [index: number]: boolean } }>({});
-  const [previewMode, setPreviewMode] = useState(false);
+  const [previewMode, setPreviewMode] = useState(props.previewMode ?? false);;
   const [modalOpen, setModalOpen] = useState(false);
+
+   useEffect(() => {
+    if (typeof props.previewMode === 'boolean') {
+      setPreviewMode(props.previewMode);
+    }
+  }, [props.previewMode]);
 
   const toggleEdit = (category: string, index: number) => {
     if (previewMode) return;

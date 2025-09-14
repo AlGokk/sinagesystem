@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFloppyDisk, faEye, faPen, faCog } from '@fortawesome/free-solid-svg-icons';
 import PageManagementModal from '../../PageManagementModals/PageManagementModal'; // Pfad anpassen
 
+
 const outerContainerStyle: React.CSSProperties = {
   maxWidth: 900,
   margin: '40px auto',
