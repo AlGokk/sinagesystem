@@ -2,12 +2,9 @@ import React, { useRef, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from './Header';
 
-// FontAwesome Icons
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExpand, faCompress, faPlus } from '@fortawesome/free-solid-svg-icons';
 
-
-// Deine Preisliste-Komponente importieren
 import PriceListTemplateDummy from '../PriceListTemplates/dummy/PriceListTemplateDummy';
 
 const GenericPage: React.FC<{
@@ -39,7 +36,6 @@ const GenericPage: React.FC<{
 
   return (
     <div ref={fullscreenRef} style={pageStyle}>
-      {/* Nur auf Seite 1 die Preisliste anzeigen */}
       {title === 'Seite 1' ? (
         <PriceListTemplateDummy previewMode={isFullscreen ?? false} />
       ) : (
@@ -52,6 +48,7 @@ const GenericPage: React.FC<{
   );
 };
 
+
 const MultiPageContainer: React.FC = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
@@ -59,6 +56,7 @@ const MultiPageContainer: React.FC = () => {
   const [pages, setPages] = useState<{ id: string; title: string }[]>([{ id: '1', title: 'Seite 1' }]);
   const [fullscreenPageId, setFullscreenPageId] = useState<string | null>(null);
 
+  // Refs mit dynamischem Map für die Seitencontainer
   const pageRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const fullscreenRef = useRef<HTMLDivElement>(null);
 
@@ -91,9 +89,7 @@ const MultiPageContainer: React.FC = () => {
     if (id === '1') return;
     setPages((prev) => {
       const newPages = prev.filter((p) => p.id !== id);
-      if (pageId === id) {
-        navigate('/page/1');
-      }
+      if (pageId === id) navigate('/page/1');
       return newPages;
     });
   };
@@ -107,21 +103,29 @@ const MultiPageContainer: React.FC = () => {
     }
   };
 
+  const scrollToPage = (id: string) => {
+    pageRefs.current[id]?.scrollIntoView({ behavior: 'smooth' });
+    navigate(`/page/${id}`);
+  };
+
   const isFullscreenActive = fullscreenPageId !== null;
 
-  const buttonStyle: React.CSSProperties = {
-    padding: '8px 12px',
-    fontSize: '0.9rem',
-    cursor: 'pointer',
-    borderRadius: 6,
-    marginBottom: '6px',
-    border: '1px solid #ccc',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '6px',
-    transition: 'background-color 0.3s ease',
-  };
+const buttonStyle: React.CSSProperties = {
+  padding: '8px 12px',
+  fontSize: '0.9rem',
+  cursor: 'pointer',
+  borderRadius: 6,
+  marginBottom: '6px',
+  border: '1px solid #ccc',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  gap: '6px',
+  transition: 'background-color 0.3s ease',
+  backgroundColor: '#d3d3d3',  // hellgrau
+  color: '#111', // dunkle Schrift, optional
+};
+
 
   const closeFullscreenButtonStyle: React.CSSProperties = {
     position: 'fixed',
@@ -143,6 +147,17 @@ const MultiPageContainer: React.FC = () => {
     <div>
       {!isFullscreenActive && <Header />}
 
+      {/* Neue Seitenliste unter Header, über den Seiten */}
+      {!isFullscreenActive && (
+        <div style={{ display: 'flex', padding: '10px 20px', overflowX: 'auto', gap: 8, backgroundColor: '#eef2f5' }}>
+          {pages.map((page) => (
+            <button key={page.id} style={buttonStyle} onClick={() => scrollToPage(page.id)}>
+              {page.title}
+            </button>
+          ))}
+        </div>
+      )}
+
       {isFullscreenActive && (
         <button
           style={closeFullscreenButtonStyle}
@@ -159,7 +174,7 @@ const MultiPageContainer: React.FC = () => {
           backgroundColor: isFullscreenActive ? '#000' : '#f0f0f0',
           minHeight: '100vh',
           padding: isFullscreenActive ? '0' : '40px',
-          marginTop: isFullscreenActive ? 0 : 80,
+          marginTop: isFullscreenActive ? 0 : 0,
           fontFamily: "'Montserrat', sans-serif",
         }}
       >
@@ -174,6 +189,7 @@ const MultiPageContainer: React.FC = () => {
               justifyContent: 'center',
               gap: '20px',
               marginBottom: '40px',
+              scrollMarginTop: 90,
             }}
           >
             <GenericPage
@@ -208,7 +224,6 @@ const MultiPageContainer: React.FC = () => {
             )}
           </div>
         ))}
-
         {!isFullscreenActive && (
           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
             <button
