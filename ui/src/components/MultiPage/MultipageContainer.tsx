@@ -8,9 +8,6 @@ import { faExpand, faCompress, faPlus, faImage } from '@fortawesome/free-solid-s
 
 import PriceListTemplateDummy from '../PriceListTemplates/dummy/PriceListTemplateDummy';
 
-import { ResizableBox } from 'react-resizable';
-import 'react-resizable/css/styles.css';
-
 const GenericPage: React.FC<{
   title: string;
   isFullscreen?: boolean;
@@ -41,29 +38,33 @@ const GenericPage: React.FC<{
         <PriceListTemplateDummy previewMode={isFullscreen ?? false} />
       ) : (
         <>
-          {isFullscreen ? '' : ''}
+          <h2>{title}</h2>
+          {isFullscreen ? 'im Vollbildmodus' : ''}
         </>
       )}
 
       {imageSrc && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20, width: '100%' }}>
-          <ResizableBox
-            width={300}
-            height={200}
-            minConstraints={[100, 100]}
-            maxConstraints={[
-              typeof pageWidth === 'number' ? pageWidth : 800,
-              typeof pageHeight === 'number' ? pageHeight : 600,
-            ]}
-            resizeHandles={['se']}
-            style={{ display: 'flex', justifyContent: 'center' }}
-          >
-            <img
-              src={imageSrc}
-              alt={`Bild für ${title}`}
-              style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }}
-            />
-          </ResizableBox>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: 20,
+            width: '100%',
+            height: 'auto',
+          }}
+        >
+          <img
+            src={imageSrc}
+            alt={`Bild für ${title}`}
+            style={{
+              maxWidth: '100%',
+              maxHeight: '80vh',
+              height: 'auto',
+              borderRadius: 8,
+              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+              objectFit: 'contain',
+            }}
+          />
         </div>
       )}
     </div>
@@ -249,7 +250,7 @@ const MultiPageContainer: React.FC = () => {
               width: '100%',
             }}
           >
-            {/* Bild Icon nur anzeigen wenn kein Bild vorhanden */}
+            {/* Icons direkt über der Seite */}
             {!isFullscreenActive && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', width: pageWidth, gap: 8, marginBottom: 8 }}>
                 {page.id !== '1' && (
@@ -288,6 +289,7 @@ const MultiPageContainer: React.FC = () => {
               </div>
             )}
 
+            {/* Seite und Bild werden responsiv zentriert dargestellt */}
             <GenericPage
               title={page.title}
               isFullscreen={fullscreenPageId === page.id}
