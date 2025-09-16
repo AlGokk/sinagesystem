@@ -4,9 +4,12 @@ import { useMediaQuery } from 'react-responsive';
 import Header from './Header';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faExpand, faCompress, faPlus } from '@fortawesome/free-solid-svg-icons';
+import { faExpand, faCompress, faPlus, faImage } from '@fortawesome/free-solid-svg-icons';
 
 import PriceListTemplateDummy from '../PriceListTemplates/dummy/PriceListTemplateDummy';
+
+import { ResizableBox } from 'react-resizable';
+import 'react-resizable/css/styles.css';
 
 const GenericPage: React.FC<{
   title: string;
@@ -14,7 +17,8 @@ const GenericPage: React.FC<{
   fullscreenRef?: React.RefObject<HTMLDivElement>;
   pageWidth: number | string;
   pageHeight: number | string;
-}> = ({ title, isFullscreen, fullscreenRef, pageWidth, pageHeight }) => {
+  imageSrc?: string;
+}> = ({ title, isFullscreen, fullscreenRef, pageWidth, pageHeight, imageSrc }) => {
   const pageStyle: React.CSSProperties = {
     backgroundColor: '#fff',
     borderRadius: isFullscreen ? 0 : 8,
@@ -37,9 +41,30 @@ const GenericPage: React.FC<{
         <PriceListTemplateDummy previewMode={isFullscreen ?? false} />
       ) : (
         <>
-          <h2>{title}</h2>
-          {isFullscreen ? 'im Vollbildmodus' : ''}
+          {isFullscreen ? '' : ''}
         </>
+      )}
+
+      {imageSrc && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20, width: '100%' }}>
+          <ResizableBox
+            width={300}
+            height={200}
+            minConstraints={[100, 100]}
+            maxConstraints={[
+              typeof pageWidth === 'number' ? pageWidth : 800,
+              typeof pageHeight === 'number' ? pageHeight : 600,
+            ]}
+            resizeHandles={['se']}
+            style={{ display: 'flex', justifyContent: 'center' }}
+          >
+            <img
+              src={imageSrc}
+              alt={`Bild für ${title}`}
+              style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }}
+            />
+          </ResizableBox>
+        </div>
       )}
     </div>
   );
@@ -49,45 +74,49 @@ const MultiPageContainer: React.FC = () => {
   const { pageId } = useParams<{ pageId: string }>();
   const navigate = useNavigate();
 
-  // Bildschirmgrößen-Abfragen via react-responsive
   const isLargeScreen = useMediaQuery({ minWidth: 1920 });
   const isDesktop = useMediaQuery({ minWidth: 1200, maxWidth: 1919 });
   const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1199 });
-  const isMobile = useMediaQuery({ maxWidth: 767 });
 
-  // Dynamische Breite/Höhe je nach Bildschirmtyp
-  const pageWidth = isLargeScreen
-    ? 1123
-    : isDesktop
-    ? 794
-    : isTablet
-    ? '90vw'
-    : '100vw';
+  const pageWidth = isLargeScreen ? 1123 : isDesktop ? 794 : isTablet ? '90vw' : '100vw';
+  const pageHeight = isLargeScreen ? 1587 : isDesktop ? 1123 : isTablet ? 'auto' : 'auto';
 
-  const pageHeight = isLargeScreen
-    ? 1587
-    : isDesktop
-    ? 1123
-    : isTablet
-    ? 'auto'
-    : 'auto';
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [pageImages, setPageImages] = useState<Record<string, string>>({});
   const [pages, setPages] = useState<{ id: string; title: string }[]>([{ id: '1', title: 'Seite 1' }]);
   const [fullscreenPageId, setFullscreenPageId] = useState<string | null>(null);
 
   const pageRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const fullscreenRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (pageId && pageRefs.current[pageId]) {
-      pageRefs.current[pageId]?.scrollIntoView({ behavior: 'smooth' });
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
+  };
+
+  const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (typeof FileReader === 'undefined') {
+      console.error('FileReader nicht verfügbar.');
+      return;
     }
-  }, [pageId]);
+    const files = event.target.files;
+    if (!files || files.length === 0 || !pageId) return;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        setPageImages(prev => ({ ...prev, [pageId]: reader.result as string }));
+      }
+    };
+    reader.onerror = () => {
+      console.error('Fehler beim Lesen der Datei');
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (fullscreenPageId) {
-      const elem = fullscreenRef.current;
-      if (elem && fullscreenPageId === '1') {
+      const elem = pageRefs.current[fullscreenPageId];
+      if (elem) {
         elem.requestFullscreen?.().catch(console.error);
       }
     } else {
@@ -99,16 +128,21 @@ const MultiPageContainer: React.FC = () => {
 
   const addPage = () => {
     const newPageId = (pages.length + 1).toString();
-    setPages([...pages, { id: newPageId, title: `Seite ${newPageId}` }]);
+    setPages(prev => [...prev, { id: newPageId, title: `Seite ${newPageId}` }]);
     navigate(`/page/${newPageId}`);
   };
 
   const deletePage = (id: string) => {
     if (id === '1') return;
-    setPages((prev) => {
-      const newPages = prev.filter((p) => p.id !== id);
+    setPages(prev => {
+      const newPages = prev.filter(p => p.id !== id);
       if (pageId === id) navigate('/page/1');
       return newPages;
+    });
+    setPageImages(prev => {
+      const newImages = { ...prev };
+      delete newImages[id];
+      return newImages;
     });
   };
 
@@ -181,7 +215,6 @@ const MultiPageContainer: React.FC = () => {
         </div>
       )}
 
-      {/* Roter Button zum Schließen (immer über allem im Vollbild) */}
       {isFullscreenActive && (
         <button
           style={closeFullscreenButtonStyle}
@@ -197,7 +230,7 @@ const MultiPageContainer: React.FC = () => {
         style={{
           backgroundColor: isFullscreenActive ? '#000' : '#f0f0f0',
           minHeight: '100vh',
-          padding: isFullscreenActive ? '0' : '40px',
+          padding: isFullscreenActive ? 0 : 40,
           fontFamily: "'Montserrat', sans-serif",
         }}
       >
@@ -209,63 +242,65 @@ const MultiPageContainer: React.FC = () => {
               display: fullscreenPageId === page.id || fullscreenPageId === null ? 'flex' : 'none',
               flexDirection: 'column',
               alignItems: 'center',
-              marginBottom: '60px',
-              scrollMarginTop: 90,
+              justifyContent: fullscreenPageId === page.id ? 'center' : 'flex-start',
+              height: fullscreenPageId === page.id ? '100vh' : 'auto',
+              marginBottom: fullscreenPageId === page.id ? 0 : 60,
+              scrollMarginTop: fullscreenPageId === page.id ? 0 : 90,
+              width: '100%',
             }}
           >
-            {/* Wrapper für A4 Container + Buttons */}
-            <div style={{ position: 'relative', display: 'inline-block' }}>
-              {!isFullscreenActive && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: -40,
-                    right: 0,
-                    display: 'flex',
-                    gap: '8px',
-                  }}
-                >
-                  {page.id !== '1' && (
-                    <button
-                      style={{ ...buttonStyle, backgroundColor: '#ff4d4d' }}
-                      onClick={() => deletePage(page.id)}
-                      title="Seite löschen"
-                    >
-                      <img
-                        src="https://cdn-icons-png.flaticon.com/512/484/484662.png"
-                        alt="Löschen"
-                        style={{ width: 18, height: 18 }}
-                      />
-                    </button>
-                  )}
+            {/* Bild Icon nur anzeigen wenn kein Bild vorhanden */}
+            {!isFullscreenActive && (
+              <div style={{ display: 'flex', justifyContent: 'flex-end', width: pageWidth, gap: 8, marginBottom: 8 }}>
+                {page.id !== '1' && (
                   <button
-                    style={{ ...buttonStyle, backgroundColor: '#007bff' }}
-                    onClick={() => toggleFullscreen(page.id)}
-                    title={fullscreenPageId === page.id ? 'Vollbild schließen' : 'Vollbild'}
+                    style={{ ...buttonStyle, backgroundColor: '#ff4d4d' }}
+                    onClick={() => deletePage(page.id)}
+                    title="Seite löschen"
                   >
-                    <FontAwesomeIcon icon={fullscreenPageId === page.id ? faCompress : faExpand} />
+                    <img
+                      src="https://cdn-icons-png.flaticon.com/512/484/484662.png"
+                      alt="Löschen"
+                      style={{ width: 18, height: 18 }}
+                    />
                   </button>
-                </div>
-              )}
+                )}
 
-              <GenericPage
-                title={page.title}
-                isFullscreen={fullscreenPageId === page.id}
-                fullscreenRef={page.id === '1' ? fullscreenRef : undefined}
-                pageWidth={pageWidth}
-                pageHeight={pageHeight}
-              />
-            </div>
+                {!pageImages[page.id] && (
+                  <button
+                    style={{ ...buttonStyle, backgroundColor: '#6c757d' }}
+                    onClick={openFileDialog}
+                    title="Foto hochladen"
+                  >
+                    <FontAwesomeIcon icon={faImage} />
+                  </button>
+                )}
+
+                <input type="file" ref={fileInputRef} style={{ display: 'none' }} accept="image/*" onChange={onFileChange} />
+
+                <button
+                  style={{ ...buttonStyle, backgroundColor: '#007bff' }}
+                  onClick={() => toggleFullscreen(page.id)}
+                  title={fullscreenPageId === page.id ? 'Vollbild schließen' : 'Vollbild'}
+                >
+                  <FontAwesomeIcon icon={fullscreenPageId === page.id ? faCompress : faExpand} />
+                </button>
+              </div>
+            )}
+
+            <GenericPage
+              title={page.title}
+              isFullscreen={fullscreenPageId === page.id}
+              pageWidth={pageWidth}
+              pageHeight={pageHeight}
+              imageSrc={pageImages[page.id]}
+            />
           </div>
         ))}
 
         {!isFullscreenActive && (
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <button
-              style={{ ...buttonStyle, backgroundColor: '#28a745' }}
-              onClick={addPage}
-              title="Neue Seite hinzufügen"
-            >
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+            <button style={{ ...buttonStyle, backgroundColor: '#28a745' }} onClick={addPage} title="Neue Seite hinzufügen">
               <FontAwesomeIcon icon={faPlus} /> Neue Seite
             </button>
           </div>
