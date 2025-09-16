@@ -39,7 +39,7 @@ const GenericPage: React.FC<{
       ) : (
         <>
           <h2>{title}</h2>
-          {isFullscreen ? 'im Vollbildmodus - URL kopieren und auf gewünschte Monitor im Browser anzeigen' : ''}
+          {isFullscreen ? 'im Vollbildmodus' : ''}
         </>
       )}
 
@@ -267,7 +267,8 @@ const MultiPageContainer: React.FC = () => {
                   </button>
                 )}
 
-                {!pageImages[page.id] && (
+                {/* Bild-Icon nur anzeigen wenn kein Bild und Seite keine Spezialkomponente */}
+                {!pageImages[page.id] && page.title !== 'Seite 1' && (
                   <button
                     style={{ ...buttonStyle, backgroundColor: '#6c757d' }}
                     onClick={openFileDialog}
@@ -289,7 +290,6 @@ const MultiPageContainer: React.FC = () => {
               </div>
             )}
 
-            {/* Seite und Bild werden responsiv zentriert dargestellt */}
             <GenericPage
               title={page.title}
               isFullscreen={fullscreenPageId === page.id}
