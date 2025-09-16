@@ -39,7 +39,7 @@ const GenericPage: React.FC<{
       ) : (
         <>
           <h2>{title}</h2>
-          {isFullscreen ? 'im Vollbildmodus' : ''}
+          {isFullscreen ? 'im Vollbildmodus - URL kopieren und auf gewünschte Monitor im Browser anzeigen' : ''}
         </>
       )}
 
