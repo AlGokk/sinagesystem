@@ -20,10 +20,11 @@ const GenericPage: React.FC<{
     backgroundColor: '#fff',
     borderRadius: isFullscreen ? 0 : 8,
     boxShadow: isFullscreen ? 'none' : '0 2px 10px rgba(0,0,0,0.1)',
+    border: isFullscreen ? 'none' : '1px solid #ddd',
     marginBottom: isFullscreen ? 0 : 40,
     padding: isFullscreen ? '40px 60px' : 40,
     width: isFullscreen ? '100vw' : pageWidth,
-    height: isFullscreen ? '100vh' : pageHeight,
+    height: isFullscreen ? '100vh' : typeof pageHeight === 'number' ? `${pageHeight}px` : pageHeight,
     boxSizing: 'border-box',
     overflow: 'auto',
     position: 'relative',
@@ -37,10 +38,10 @@ const GenericPage: React.FC<{
       {title === 'Seite 1' ? (
         <PriceListTemplateDummy previewMode={isFullscreen ?? false} />
       ) : (
-        <>
-          <h2>{title}</h2>
-          {isFullscreen ? 'im Vollbildmodus' : ''}
-        </>
+        !isFullscreen && (
+          <>
+          </>
+        )
       )}
 
       {imageSrc && (
@@ -48,21 +49,23 @@ const GenericPage: React.FC<{
           style={{
             display: 'flex',
             justifyContent: 'center',
+            alignItems: 'center',
             marginTop: 20,
             width: '100%',
-            height: 'auto',
+            height: typeof pageHeight === 'number' ? `${pageHeight}px` : pageHeight,
+            padding: 0,
+            boxSizing: 'border-box',
           }}
         >
           <img
             src={imageSrc}
             alt={`Bild für ${title}`}
             style={{
-              maxWidth: '100%',
-              maxHeight: '80vh',
-              height: 'auto',
-              borderRadius: 8,
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+              width: '100%',
+              height: '100%',
               objectFit: 'contain',
+              borderRadius: isFullscreen ? 0 : 8,
+              boxShadow: isFullscreen ? 'none' : '0 2px 10px rgba(0,0,0,0.1)',
             }}
           />
         </div>
@@ -80,7 +83,7 @@ const MultiPageContainer: React.FC = () => {
   const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1199 });
 
   const pageWidth = isLargeScreen ? 1123 : isDesktop ? 794 : isTablet ? '90vw' : '100vw';
-  const pageHeight = isLargeScreen ? 1587 : isDesktop ? 1123 : isTablet ? 'auto' : 'auto';
+  const pageHeight = isLargeScreen ? 1587 : isDesktop ? 1123 : isTablet ? 900 : 700;
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -250,7 +253,6 @@ const MultiPageContainer: React.FC = () => {
               width: '100%',
             }}
           >
-            {/* Icons direkt über der Seite */}
             {!isFullscreenActive && (
               <div style={{ display: 'flex', justifyContent: 'flex-end', width: pageWidth, gap: 8, marginBottom: 8 }}>
                 {page.id !== '1' && (
@@ -267,7 +269,6 @@ const MultiPageContainer: React.FC = () => {
                   </button>
                 )}
 
-                {/* Bild-Icon nur anzeigen wenn kein Bild und Seite keine Spezialkomponente */}
                 {!pageImages[page.id] && page.title !== 'Seite 1' && (
                   <button
                     style={{ ...buttonStyle, backgroundColor: '#6c757d' }}
